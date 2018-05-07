@@ -2,8 +2,13 @@
 
 import os
 import re
+import stat
+import time
 import logging
+import exifread
 import datetime
+
+import config
 
 
 class FileProp(object):
@@ -90,7 +95,16 @@ class FileProp(object):
         return None
 
     def __time_by_exif(self, fullname):
-        return None
+        try:
+            with open(fullname, 'rb') as f:
+                tags = exifread.process_file(f)
+                strtime = tags['EXIF DateTimeOriginal'].values
+                return datetime.datetime.strptime(strtime, '%Y:%m:%d %H:%M:%S')
+        except (OSError, KeyError):
+            return None
+
+    def __time_by_attr(self, fullname):
+        self.__time = time.localtime(os.stat(fullname)[stat.ST_MTIME])
 
     def out_name(self):
         if self.__time:
@@ -107,3 +121,9 @@ class FileProp(object):
 
     def ok(self):
         return self.__ok
+
+if __name__ == '__main__':
+    import sys
+
+    fp = FileProp(config.Config(False), sys.argv[1])
+    print(fp.type(), fp.time(), fp.ok())
