@@ -8,7 +8,7 @@ class Config(object):
     DEFAULT_CONFIG_FILE = os.path.expanduser('~/.photo-importer.cfg')
     DEFAULTS = {
         'main': {
-            'out_date_format': 'YYYY-MM-DD_hh-mm-ss'
+            'out_time_format': '%%Y-%%m-%%d_%%H-%%M-%%S'
         }
     }
 
@@ -30,8 +30,8 @@ class Config(object):
         with open(self.DEFAULT_CONFIG_FILE, 'w') as conffile:
             self.__config.write(conffile)
 
-    def __getitem__(self, key):
-        return self.__config[key]
+    def __getitem__(self, sect):
+        return self.__config[sect]
 
 
 if __name__ == "__main__":
