@@ -11,6 +11,7 @@ class FileProp(object):
     IMAGE = 1
     VIDEO = 2
     AUDIO = 3
+    GARBAGE = 4
 
     EXT_TO_TYPE = {
         '.jpeg': IMAGE,
@@ -21,7 +22,9 @@ class FileProp(object):
         '.avi': VIDEO,
         '.mp3': AUDIO,
         '.3gpp': AUDIO,
-        '.m4a': AUDIO
+        '.m4a': AUDIO,
+        '.thm': GARBAGE,
+        '.ctg': GARBAGE,
     }
 
     DATE_REX = [
@@ -38,7 +41,7 @@ class FileProp(object):
         (re.compile('\d{8}'), '%Y%m%d'),
     ]
 
-    def __init__(self, config, fullname, exif_prior=True):
+    def __init__(self, config, fullname):
         self.__config = config
 
         path, fname_ext = os.path.split(fullname)
@@ -47,7 +50,7 @@ class FileProp(object):
         self.__type = self.__type_by_ext(ext)
 
         if self.__type == self.IMAGE:
-            if exif_prior:
+            if self.__config['main']['use_exif_first']:
                 self.__time = self.__time_by_exif(fullname)
                 if self.__time is None:
                     self.__time = self.__time_by_name(fname)

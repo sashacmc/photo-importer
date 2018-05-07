@@ -129,6 +129,13 @@ class TestFileProp(unittest.TestCase):
         self.assertEqual(fp.time(), datetime.datetime(2017, 11, 22))
         self.assertEqual(fp.ok(), False)
 
+    # garbage
+    def test_garbage(self):
+        fp = fileprop.FileProp(self.conf, 'M0101.CTG')
+        self.assertEqual(fp.type(), fp.GARBAGE)
+        self.assertEqual(fp.time(), None)
+        self.assertEqual(fp.ok(), False)
+
 
 if __name__ == '__main__':
     unittest.main()
