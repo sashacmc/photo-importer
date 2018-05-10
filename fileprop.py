@@ -54,17 +54,7 @@ class FileProp(object):
 
         self.__type = self.__type_by_ext(ext)
 
-        if self.__type == self.IMAGE:
-            if self.__config['main']['use_exif_first']:
-                self.__time = self.__time_by_exif(fullname)
-                if self.__time is None:
-                    self.__time = self.__time_by_name(fname)
-            else:
-                self.__time = self.__time_by_name(fname)
-                if self.__time is None:
-                    self.__time = self.__time_by_exif(fullname)
-        else:
-            self.__time = self.__time_by_name(fname)
+        self.__time = self.__time(fullname, fname)
 
         out_name = self.out_name()
         if out_name:
@@ -78,6 +68,21 @@ class FileProp(object):
         except KeyError:
             logging.warning('Unknown ext: ' + ext)
             return self.OTHER
+
+    def __time(self, fullname, name):
+        for src in self.__config['main']['time_src'].split(','):
+            time = None
+            if src == 'exif':
+                time = self.__time_by_exif(fullname)
+            elif src == 'name':
+                time = self.__time_by_name(name)
+            elif src == 'attr':
+                time = self.__time_by_attr(name)
+            else:
+                raise Exception('Wrong time_src: ' + src)
+
+            if time:
+                return time
 
     def __time_by_name(self, fname):
         for exp, fs in self.DATE_REX:
@@ -95,16 +100,22 @@ class FileProp(object):
         return None
 
     def __time_by_exif(self, fullname):
+        if self.__type != self.IMAGE:
+            return None
+
         try:
             with open(fullname, 'rb') as f:
                 tags = exifread.process_file(f)
                 strtime = tags['EXIF DateTimeOriginal'].values
                 return datetime.datetime.strptime(strtime, '%Y:%m:%d %H:%M:%S')
-        except (OSError, KeyError):
+        except (FileNotFoundError, KeyError):
             return None
 
     def __time_by_attr(self, fullname):
-        self.__time = time.localtime(os.stat(fullname)[stat.ST_MTIME])
+        try:
+            self.__time = time.localtime(os.stat(fullname)[stat.ST_MTIME])
+        except (FileNotFoundError, KeyError):
+            return None
 
     def out_name(self):
         if self.__time:

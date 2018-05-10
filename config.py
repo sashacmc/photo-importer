@@ -9,8 +9,9 @@ class Config(object):
     DEFAULTS = {
         'main': {
             'out_time_format': '%%Y-%%m-%%d_%%H-%%M-%%S',
-            'use_exif_first': True,
+            'time_src': 'exif,name,attr',
             'remove_garbage': True,
+            'threads_count': 2,
         }
     }
 
