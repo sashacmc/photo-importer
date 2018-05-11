@@ -61,11 +61,11 @@ class Rotator(object):
         return ok
 
     def status(self):
-        return (
-            len(self.__filenames),
-            self.__processed,
-            self.__good,
-            self.__errors)
+        return {
+            'total': len(self.__filenames),
+            'processed': self.__processed,
+            'good': self.__good,
+            'errors': self.__errors}
 
 
 if __name__ == '__main__':

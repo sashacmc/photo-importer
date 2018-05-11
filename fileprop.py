@@ -49,10 +49,10 @@ class FileProp(object):
     def __init__(self, config, fullname):
         self.__config = config
 
-        path, fname_ext = os.path.split(fullname)
-        fname, ext = os.path.splitext(fname_ext)
+        self.__path, fname_ext = os.path.split(fullname)
+        fname, self.__ext = os.path.splitext(fname_ext)
 
-        self.__type = self.__type_by_ext(ext)
+        self.__type = self.__type_by_ext(self.__ext)
 
         self.__time = self.__time(fullname, fname)
 
@@ -132,6 +132,19 @@ class FileProp(object):
 
     def ok(self):
         return self.__ok
+
+    def path(self):
+        return self.__path
+
+    def ext(self):
+        return self.__ext
+
+    def out_name_full(self, path=None):
+        if path is None:
+            path = self.__path
+
+        return os.path.join(path, self.out_name()) + self.ext()
+
 
 if __name__ == '__main__':
     import sys

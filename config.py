@@ -11,6 +11,7 @@ class Config(object):
             'out_time_format': '%%Y-%%m-%%d_%%H-%%M-%%S',
             'time_src': 'exif,name,attr',
             'remove_garbage': True,
+            'move_mode': False,
             'threads_count': 2,
         }
     }
