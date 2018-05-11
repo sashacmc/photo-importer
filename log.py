@@ -18,10 +18,10 @@ def initLogger(filename=None):
             os.makedirs(os.path.split(filename)[0])
         except OSError:
             pass
-        #init file logger and console
+        # init file logger and console
         fh = logging.FileHandler(filename, 'a')
     else:
-        #init only console
+        # init only console
         fh = logging.StreamHandler()
 
     form = '[%(asctime)s] [%(levelname)s] %(message)s'

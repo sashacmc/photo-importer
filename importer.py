@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import os
+import shutil
 import logging
 import threading
 
@@ -15,8 +16,8 @@ class Importer(threading.Thread):
         self.__config = config
         self.__input_path = input_path
         self.__output_path = output_path
-        self.__move_mode = bool(config['main']['move_mode'])
-        self.__remove_garbage = bool(config['main']['remove_garbage'])
+        self.__move_mode = int(config['main']['move_mode'])
+        self.__remove_garbage = int(config['main']['remove_garbage'])
         self.__rot = None
         self.__stat = {}
 
@@ -45,10 +46,13 @@ class Importer(threading.Thread):
 
     def __move_files(self, filenames):
         self.__stat['moved'] = 0
+        self.__stat['copied'] = 0
         self.__stat['removed'] = 0
         self.__stat['skipped'] = 0
+        self.__stat['processed'] = 0
         res = []
         for fname in filenames:
+            self.__stat['processed'] += 1
             prop = fileprop.FileProp(self.__config, fname)
 
             if prop.type() == prop.GARBAGE:
@@ -59,18 +63,32 @@ class Importer(threading.Thread):
                     self.__stat['skipped'] += 1
                 continue
 
-            if prop.type() == prop.OTHER:
+            if prop.type() == prop.OTHER or prop.time() is None:
                 self.__stat['skipped'] += 1
                 continue
 
             if self.__output_path:
-                pass
+                subdir = prop.time().strftime(
+                    self.__config['main']['out_date_format'])
+
+                path = os.path.join(self.__output_path, subdir)
+                if not os.path.isdir(path):
+                    os.makedirs(path)
+
+                fullname = prop.out_name_full(path)
+                if self.__move_mode:
+                    shutil.move(fname, fullname)
+                    self.__stat['moved'] += 1
+                else:
+                    shutil.copy2(fname, fullname)
+                    self.__stat['copied'] += 1
+                res.append(fullname)
             else:
                 if prop.ok():
                     res.append(fname)
                 else:
                     new_fname = prop.out_name_full()
-                    os.rename(fname, new_fname)  # TODO: CHECK DUPLICATES!!!!
+                    os.rename(fname, new_fname)
                     res.append(new_fname)
 
                 self.__stat['moved'] += 1

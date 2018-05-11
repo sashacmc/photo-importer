@@ -143,7 +143,16 @@ class FileProp(object):
         if path is None:
             path = self.__path
 
-        return os.path.join(path, self.out_name()) + self.ext()
+        out_name = self.out_name()
+
+        res = os.path.join(path, out_name) + self.ext()
+
+        i = 1
+        while (os.path.isfile(res)):
+            i += 1
+            res = os.path.join(path, out_name + '_' + str(i) + self.ext())
+
+        return res
 
 
 if __name__ == '__main__':

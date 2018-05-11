@@ -1,6 +1,6 @@
 # photo-importer
 Command line tools for photo importing/renaming/rotating
 
-#Dependencies
+# Dependencies
 python3-exif
 exiftran
