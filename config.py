@@ -17,13 +17,13 @@ class Config(object):
         }
     }
 
-    def __init__(self, create=False):
+    def __init__(self, filename=None, create=False):
+        if filename is None:
+            filename = self.DEFAULT_CONFIG_FILE
+
         self.__config = configparser.ConfigParser()
         self.__config.read_dict(self.DEFAULTS)
-        self.__config.read([
-            'photo-importer.cfg',
-            '/etc/photo-importer.cfg',
-            self.DEFAULT_CONFIG_FILE])
+        self.__config.read([filename, ])
 
         if create:
             self.__create_if_not_exists()
@@ -40,4 +40,4 @@ class Config(object):
 
 
 if __name__ == "__main__":
-    Config(True)
+    Config(create=True)

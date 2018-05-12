@@ -71,7 +71,7 @@ class Rotator(object):
 if __name__ == '__main__':
     import sys
 
-    rot = Rotator(config.Config(False), sys.argv[1:])
+    rot = Rotator(config.Config(), sys.argv[1:])
     rot.run()
 
     print(rot.status())

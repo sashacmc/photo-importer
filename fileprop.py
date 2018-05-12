@@ -159,5 +159,5 @@ class FileProp(object):
 if __name__ == '__main__':
     import sys
 
-    fp = FileProp(config.Config(False), sys.argv[1])
+    fp = FileProp(config.Config(), sys.argv[1])
     print(fp.type(), fp.time(), fp.ok())
