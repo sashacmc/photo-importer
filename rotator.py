@@ -56,7 +56,7 @@ class Rotator(object):
                 logging.error('exiftran (%s) error: %s' % (filename, error))
 
         except Exception as ex:
-            logging.error('Rotator process exeption: %s' % ex)
+            logging.error('Rotator exception (%s): %s' % (filename, ex))
 
         return ok
 

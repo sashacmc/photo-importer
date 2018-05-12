@@ -77,7 +77,7 @@ class FileProp(object):
             elif src == 'name':
                 time = self.__time_by_name(name)
             elif src == 'attr':
-                time = self.__time_by_attr(name)
+                time = self.__time_by_attr(fullname)
             else:
                 raise Exception('Wrong time_src: ' + src)
 
@@ -108,14 +108,15 @@ class FileProp(object):
                 tags = exifread.process_file(f)
                 strtime = tags['EXIF DateTimeOriginal'].values
                 return datetime.datetime.strptime(strtime, '%Y:%m:%d %H:%M:%S')
-        except (FileNotFoundError, KeyError):
-            return None
+        except (FileNotFoundError, KeyError) as ex:
+            logging.warning('time by exif (%s) exception: %s' % (fullname, ex))
 
     def __time_by_attr(self, fullname):
         try:
-            self.__time = time.localtime(os.stat(fullname)[stat.ST_MTIME])
-        except (FileNotFoundError, KeyError):
-            return None
+            return datetime.datetime.fromtimestamp(
+                time.mktime(time.localtime(os.stat(fullname)[stat.ST_MTIME])))
+        except (FileNotFoundError, KeyError) as ex:
+            logging.warning('time by attr (%s) exception: %s' % (fullname, ex))
 
     def out_name(self):
         if self.__time:

@@ -30,19 +30,24 @@ class Importer(threading.Thread):
         logging.info('Found %s files' % len(filenames))
 
         new_filenames = self.__move_files(filenames)
-        logging.info('Moved %s files' % len(new_filenames))
+        logging.info('Processed %s files' % len(new_filenames))
 
         self.__rotate_files(new_filenames)
         logging.info('Done')
 
     def __scan_files(self, input_path):
         res = []
-        for root, dirs, files in os.walk(input_path):
+        for root, dirs, files in os.walk(
+                input_path, onerror=self.__on_walk_error):
+
             for fname in files:
                 res.append(os.path.join(root, fname))
 
         self.__stat['total'] = len(res)
         return res
+
+    def __on_walk_error(self, err):
+        logging.error('Scan files error: %s' % err)
 
     def __move_files(self, filenames):
         self.__stat['moved'] = 0
@@ -50,50 +55,65 @@ class Importer(threading.Thread):
         self.__stat['removed'] = 0
         self.__stat['skipped'] = 0
         self.__stat['processed'] = 0
+        self.__stat['errors'] = 0
         res = []
         for fname in filenames:
-            self.__stat['processed'] += 1
-            prop = fileprop.FileProp(self.__config, fname)
-
-            if prop.type() == prop.GARBAGE:
-                if self.__remove_garbage:
-                    os.remove(fname)
-                    self.__stat['removed'] += 1
-                else:
-                    self.__stat['skipped'] += 1
-                continue
-
-            if prop.type() == prop.OTHER or prop.time() is None:
-                self.__stat['skipped'] += 1
-                continue
-
-            if self.__output_path:
-                subdir = prop.time().strftime(
-                    self.__config['main']['out_date_format'])
-
-                path = os.path.join(self.__output_path, subdir)
-                if not os.path.isdir(path):
-                    os.makedirs(path)
-
-                fullname = prop.out_name_full(path)
-                if self.__move_mode:
-                    shutil.move(fname, fullname)
-                    self.__stat['moved'] += 1
-                else:
-                    shutil.copy2(fname, fullname)
-                    self.__stat['copied'] += 1
-                res.append(fullname)
-            else:
-                if prop.ok():
-                    res.append(fname)
-                else:
-                    new_fname = prop.out_name_full()
-                    os.rename(fname, new_fname)
+            try:
+                new_fname = self.__move_file(fname)
+                if new_fname:
                     res.append(new_fname)
+            except Exception as ex:
+                logging.error('Move files exception: %s' % ex)
+                self.__stat['errors'] += 1
 
-                self.__stat['moved'] += 1
-
+            self.__stat['processed'] += 1
         return res
+
+    def __move_file(self, fname):
+        prop = fileprop.FileProp(self.__config, fname)
+
+        if prop.type() == prop.GARBAGE:
+            if self.__remove_garbage:
+                os.remove(fname)
+                logging.info('removed "%s"' % fname)
+                self.__stat['removed'] += 1
+            else:
+                self.__stat['skipped'] += 1
+            return None
+
+        if prop.type() == prop.OTHER or prop.time() is None:
+            self.__stat['skipped'] += 1
+            return None
+
+        if self.__output_path:
+            subdir = prop.time().strftime(
+                self.__config['main']['out_date_format'])
+
+            path = os.path.join(self.__output_path, subdir)
+            if not os.path.isdir(path):
+                os.makedirs(path)
+
+            fullname = prop.out_name_full(path)
+            if self.__move_mode:
+                shutil.move(fname, fullname)
+                logging.info('"%s" moved "%s"' % (fname, fullname))
+                self.__stat['moved'] += 1
+            else:
+                shutil.copy2(fname, fullname)
+                logging.info('"%s" copied "%s"' % (fname, fullname))
+                self.__stat['copied'] += 1
+
+            return fullname
+        else:
+            if prop.ok():
+                self.__stat['skipped'] += 1
+                return fname
+            else:
+                new_fname = prop.out_name_full()
+                os.rename(fname, new_fname)
+                logging.info('"%s" renamed "%s"' % (fname, new_fname))
+                self.__stat['moved'] += 1
+                return new_fname
 
     def __rotate_files(self, filenames):
         self.__rot = rotator.Rotator(self.__config, filenames)
