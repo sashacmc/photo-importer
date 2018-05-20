@@ -8,6 +8,12 @@ import fileprop
 
 
 class Mover(object):
+    OUT_SUBDIR_CFG = {
+        fileprop.FileProp.IMAGE: 'out_subdir_image',
+        fileprop.FileProp.VIDEO: 'out_subdir_video',
+        fileprop.FileProp.AUDIO: 'out_subdir_audio',
+    }
+
     def __init__(self, config, input_path, output_path, filenames):
         self.__config = config
         self.__input_path = input_path
@@ -54,10 +60,13 @@ class Mover(object):
             return None
 
         if self.__output_path:
-            subdir = prop.time().strftime(
+            type_subdir = \
+                self.__config['main'][self.OUT_SUBDIR_CFG[prop.type()]]
+            
+            date_subdir = prop.time().strftime(
                 self.__config['main']['out_date_format'])
 
-            path = os.path.join(self.__output_path, subdir)
+            path = os.path.join(self.__output_path, type_subdir, date_subdir)
             if not os.path.isdir(path):
                 os.makedirs(path)
 

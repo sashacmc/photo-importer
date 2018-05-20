@@ -10,6 +10,9 @@ class Config(object):
         'main': {
             'out_time_format': '%%Y-%%m-%%d_%%H-%%M-%%S',
             'out_date_format': '%%Y-%%m-%%d',
+            'out_subdir_image': 'Foto',
+            'out_subdir_video': 'Video',
+            'out_subdir_audio': 'Audio',
             'time_src': 'exif,name,attr',
             'remove_garbage': 1,
             'move_mode': 0,
