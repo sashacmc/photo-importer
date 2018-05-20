@@ -62,7 +62,7 @@ class Mover(object):
         if self.__output_path:
             type_subdir = \
                 self.__config['main'][self.OUT_SUBDIR_CFG[prop.type()]]
-            
+
             date_subdir = prop.time().strftime(
                 self.__config['main']['out_date_format'])
 

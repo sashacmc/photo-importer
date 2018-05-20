@@ -1,8 +1,6 @@
 #!/usr/bin/python3
 
-import sys
 import log
-import time
 import argparse
 import threading
 import progressbar
@@ -33,15 +31,15 @@ class ProgressBar(threading.Thread):
     def run(self):
         stage = ''
         while True:
-            time.sleep(0.1)
             stat = self.__imp.status()
 
             if stage != stat['stage']:
                 stage = stat['stage']
                 if stage == 'scan':
-                    print('Scan...')
+                    print('Scan... ', end='', flush=True)
                     continue
                 if stage == 'move':
+                    print('Done.')
                     self.__create('Import:', stat['total'])
                     continue
                 if stage == 'rotate':
@@ -58,16 +56,25 @@ class ProgressBar(threading.Thread):
 
 def args_parse():
     parser = argparse.ArgumentParser()
-    parser.add_argument("echo", help="echo the string you use here")
+    parser.add_argument('in_path', help="Input path")
+    parser.add_argument('out_path', help="Output path", nargs='?')
+    parser.add_argument('-c', '--config', help="Config file")
+    parser.add_argument('-l', '--logfile', help="Log file", default='log.txt')
     return parser.parse_args()
 
 
 def main():
-    # args = args_parse()
+    args = args_parse()
 
-    log.initLogger('log.txt')
+    cfg = config.Config(args.config)
 
-    imp = importer.Importer(config.Config(), sys.argv[1], sys.argv[2])
+    log.initLogger(args.logfile)
+
+    imp = importer.Importer(
+        cfg,
+        args.in_path,
+        args.out_path)
+
     pbar = ProgressBar(imp)
     imp.start()
     pbar.start()

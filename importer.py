@@ -15,6 +15,7 @@ class Importer(threading.Thread):
         self.__config = config
         self.__input_path = input_path
         self.__output_path = output_path
+        self.__mov = None
         self.__rot = None
         self.__stat = {'stage': ''}
 
