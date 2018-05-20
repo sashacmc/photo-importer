@@ -84,7 +84,7 @@ class Mover(object):
         else:
             if prop.ok():
                 self.__stat['skipped'] += 1
-                return fname
+                return None
             else:
                 new_fname = prop.out_name_full()
                 os.rename(fname, new_fname)

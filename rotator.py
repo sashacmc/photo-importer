@@ -33,7 +33,7 @@ class Rotator(object):
     def __process(self, filename):
         ok = False
         try:
-            cmd = 'exiftran -aip %s' % filename
+            cmd = 'exiftran -aip "%s"' % filename
             p = subprocess.Popen(
                 cmd,
                 shell=True,

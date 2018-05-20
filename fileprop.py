@@ -46,6 +46,12 @@ class FileProp(object):
         (re.compile('\d{8}'), '%Y%m%d'),
     ]
 
+    TIME_SRC_CFG = {
+        IMAGE: 'time_src_image',
+        VIDEO: 'time_src_video',
+        AUDIO: 'time_src_audio',
+    }
+
     def __init__(self, config, fullname):
         self.__config = config
 
@@ -54,7 +60,7 @@ class FileProp(object):
 
         self.__type = self.__type_by_ext(self.__ext)
 
-        self.__time = self.__time(fullname, fname)
+        self.__time = self.__time(fullname, fname, self.__type)
 
         out_name = self.out_name()
         if out_name:
@@ -69,8 +75,11 @@ class FileProp(object):
             logging.warning('Unknown ext: ' + ext)
             return self.OTHER
 
-    def __time(self, fullname, name):
-        for src in self.__config['main']['time_src'].split(','):
+    def __time(self, fullname, name, tp):
+        if self.__type not in (self.IMAGE, self.VIDEO, self.AUDIO):
+            return None
+
+        for src in self.__config['main'][self.TIME_SRC_CFG[tp]].split(','):
             time = None
             if src == 'exif':
                 time = self.__time_by_exif(fullname)

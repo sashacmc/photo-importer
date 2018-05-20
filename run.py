@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import log
+import logging
 import argparse
 import threading
 import progressbar
@@ -39,7 +40,7 @@ class ProgressBar(threading.Thread):
                     print('Scan... ', end='', flush=True)
                     continue
                 if stage == 'move':
-                    print('Done.')
+                    print('Done. Found %i files' % stat['total'])
                     self.__create('Import:', stat['total'])
                     continue
                 if stage == 'rotate':
@@ -80,6 +81,8 @@ def main():
     pbar.start()
     imp.join()
     pbar.join()
+
+    logging.info('status: %s' % str(imp.status()))
 
 
 if __name__ == '__main__':
