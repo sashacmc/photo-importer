@@ -17,6 +17,7 @@ class Config(object):
             'time_src_video': 'exif,name,attr',
             'time_src_audio': 'exif,name,attr',
             'remove_garbage': 1,
+            'remove_empty_dirs': 1,
             'move_mode': 0,
             'threads_count': 2,
         }
