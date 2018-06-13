@@ -17,6 +17,9 @@ class ProgressBar(threading.Thread):
         self.__pbar = None
 
     def __create(self, name, count):
+        if count == 0:
+            return
+
         if self.__pbar:
             self.__pbar.finish()
             self.__pbar = None
@@ -57,10 +60,11 @@ class ProgressBar(threading.Thread):
 
 def args_parse():
     parser = argparse.ArgumentParser()
-    parser.add_argument('in_path', help="Input path")
-    parser.add_argument('out_path', help="Output path", nargs='?')
-    parser.add_argument('-c', '--config', help="Config file")
-    parser.add_argument('-l', '--logfile', help="Log file", default='log.txt')
+    parser.add_argument('in_path', help='Input path')
+    parser.add_argument('out_path', help='Output path', nargs='?')
+    parser.add_argument('-c', '--config', help='Config file')
+    parser.add_argument('-l', '--logfile', help='Log file', default='log.txt')
+    parser.add_argument('-d', '--dryrun', help='Dry run', action='store_true')
     return parser.parse_args()
 
 
@@ -74,7 +78,8 @@ def main():
     imp = importer.Importer(
         cfg,
         args.in_path,
-        args.out_path)
+        args.out_path,
+        args.dryrun)
 
     pbar = ProgressBar(imp)
     imp.start()

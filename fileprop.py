@@ -11,27 +11,14 @@ import datetime
 import config
 
 
+IGNORE = 0 
+IMAGE = 1
+VIDEO = 2
+AUDIO = 3
+GARBAGE = 4
+
+
 class FileProp(object):
-    OTHER = 0
-    IMAGE = 1
-    VIDEO = 2
-    AUDIO = 3
-    GARBAGE = 4
-
-    EXT_TO_TYPE = {
-        '.jpeg': IMAGE,
-        '.jpg': IMAGE,
-        '.mp4': VIDEO,
-        '.mpg': VIDEO,
-        '.mpeg': VIDEO,
-        '.avi': VIDEO,
-        '.mp3': AUDIO,
-        '.3gpp': AUDIO,
-        '.m4a': AUDIO,
-        '.thm': GARBAGE,
-        '.ctg': GARBAGE,
-    }
-
     DATE_REX = [
         (re.compile('\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}'),
             '%Y-%m-%d_%H-%M-%S'),
@@ -52,31 +39,39 @@ class FileProp(object):
         AUDIO: 'time_src_audio',
     }
 
-    def __init__(self, config, fullname):
+    FILE_EXT_CFG = {
+        IMAGE: 'file_ext_image',
+        VIDEO: 'file_ext_video',
+        AUDIO: 'file_ext_audio',
+        GARBAGE: 'file_ext_garbage',
+        IGNORE: 'file_ext_ignore',
+    }
+
+    EXT_TO_TYPE = {}
+
+    def __init__(self, config):
         self.__config = config
+        self.__prepare_ext_to_type()
+        self.__out_list = set()
 
-        self.__path, fname_ext = os.path.split(fullname)
-        fname, self.__ext = os.path.splitext(fname_ext)
-
-        self.__type = self.__type_by_ext(self.__ext)
-
-        self.__time = self.__time(fullname, fname, self.__type)
-
-        out_name = self.out_name()
-        if out_name:
-            self.__ok = fname[0:len(out_name)] == out_name
-        else:
-            self.__ok = False
+    def __prepare_ext_to_type(self):
+        self.EXT_TO_TYPE = {}
+        for tp, cfg in self.FILE_EXT_CFG.items():
+            for ext in self.__config['main'][cfg].split(','):
+                ext = '.' + ext.lower()
+                if ext in self.EXT_TO_TYPE:
+                    logging.fatal('Double ext: ' + ext)
+                self.EXT_TO_TYPE[ext] = tp
 
     def __type_by_ext(self, ext):
         try:
             return self.EXT_TO_TYPE[ext.lower()]
         except KeyError:
             logging.warning('Unknown ext: ' + ext)
-            return self.OTHER
+            return IGNORE 
 
     def __time(self, fullname, name, tp):
-        if self.__type not in (self.IMAGE, self.VIDEO, self.AUDIO):
+        if tp not in (IMAGE, VIDEO, AUDIO):
             return None
 
         for src in self.__config['main'][self.TIME_SRC_CFG[tp]].split(','):
@@ -93,6 +88,8 @@ class FileProp(object):
             if time:
                 return time
 
+        return None
+
     def __time_by_name(self, fname):
         for exp, fs in self.DATE_REX:
             mat = exp.findall(fname)
@@ -105,13 +102,9 @@ class FileProp(object):
                     return time
                 except ValueError:
                     pass
-
         return None
 
     def __time_by_exif(self, fullname):
-        if self.__type != self.IMAGE:
-            return None
-
         try:
             with open(fullname, 'rb') as f:
                 tags = exifread.process_file(f)
@@ -127,12 +120,49 @@ class FileProp(object):
         except (FileNotFoundError, KeyError) as ex:
             logging.warning('time by attr (%s) exception: %s' % (fullname, ex))
 
-    def out_name(self):
-        if self.__time:
-            return self.__time.strftime(
+    def _out_name_full(self, path, out_name, ext):
+        res = os.path.join(path, out_name) + ext
+
+        i = 1
+        while os.path.isfile(res) or res in self.__out_list:
+            i += 1
+            res = os.path.join(path, out_name + '_' + str(i) + ext)
+
+        self.__out_list.add(res)
+
+        return res
+
+    def get(self, fullname):
+        path, fname_ext = os.path.split(fullname)
+        fname, ext = os.path.splitext(fname_ext)
+
+        tp = self.__type_by_ext(ext)
+
+        ftime = self.__time(fullname, fname, tp)
+
+        if ftime:
+            out_name = ftime.strftime(
                 self.__config['main']['out_time_format'])
         else:
-            return None
+            out_name = None
+
+        if out_name:
+            ok = fname[0:len(out_name)] == out_name
+        else:
+            ok = False
+
+        return FilePropRes(self, tp, ftime, path, ext, out_name, ok)
+
+
+class FilePropRes(object):
+    def __init__(self, prop_ptr, tp, time, path, ext, out_name, ok):
+        self.__prop_ptr = prop_ptr
+        self.__type = tp
+        self.__time = time
+        self.__path = path
+        self.__ext = ext
+        self.__out_name = out_name
+        self.__ok = ok
 
     def type(self):
         return self.__type
@@ -149,21 +179,15 @@ class FileProp(object):
     def ext(self):
         return self.__ext
 
+    def out_name(self):
+        return self.__out_name
+
     def out_name_full(self, path=None):
         if path is None:
             path = self.__path
 
-        out_name = self.out_name()
-
-        res = os.path.join(path, out_name) + self.ext()
-
-        i = 1
-        while (os.path.isfile(res)):
-            i += 1
-            res = os.path.join(path, out_name + '_' + str(i) + self.ext())
-
-        return res
-
+        return self.__prop_ptr._out_name_full(
+            path, self.__out_name, self.__ext)
 
 if __name__ == '__main__':
     import sys

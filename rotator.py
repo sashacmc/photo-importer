@@ -8,9 +8,10 @@ import config
 
 
 class Rotator(object):
-    def __init__(self, config, filenames):
+    def __init__(self, config, filenames, dryrun):
         self.__config = config
         self.__filenames = filenames
+        self.__dryrun = dryrun
         self.__processed = 0
         self.__good = 0
         self.__errors = 0
@@ -34,6 +35,11 @@ class Rotator(object):
         ok = False
         try:
             cmd = 'exiftran -aip "%s"' % filename
+            logging.info('rotate: %s' % cmd)
+
+            if self.__dryrun:
+                return True
+
             p = subprocess.Popen(
                 cmd,
                 shell=True,

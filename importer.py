@@ -7,26 +7,28 @@ import threading
 import mover
 import config
 import rotator
+import fileprop
 
 
 class Importer(threading.Thread):
-    def __init__(self, config, input_path, output_path):
+    def __init__(self, config, input_path, output_path, dryrun):
         threading.Thread.__init__(self)
         self.__config = config
         self.__input_path = input_path
         self.__output_path = output_path
+        self.__dryrun = dryrun
         self.__mov = None
         self.__rot = None
         self.__stat = {'stage': ''}
 
     def run(self):
         logging.info(
-            'Start: %s -> %s' %
-            (self.__input_path, self.__output_path))
+            'Start: %s -> %s (dryrun: %s)' %
+            (self.__input_path, self.__output_path, self.__dryrun))
 
         filenames, dirs = self.__scan_files(self.__input_path)
 
-        new_filenames = self.__move_files(filenames)
+        new_filenames = self.__image_filenames(self.__move_files(filenames))
 
         if self.__config['main']['remove_empty_dirs']:
             self.__remove_empty_dirs(dirs)
@@ -50,6 +52,8 @@ class Importer(threading.Thread):
                 res_dir.append(os.path.join(root, dname))
 
         self.__stat['total'] = len(res)
+        res.sort()
+        res_dir.sort()
         logging.info('Found %i files and %i dirs' % (len(res), len(res_dir)))
         return res, res_dir
 
@@ -62,18 +66,27 @@ class Importer(threading.Thread):
             self.__config,
             self.__input_path,
             self.__output_path,
-            filenames)
+            filenames,
+            self.__dryrun)
         self.__stat['stage'] = 'move'
 
         res = self.__mov.run()
         logging.info('Processed %s files' % len(res))
         return res
 
+    def __image_filenames(self, move_result):
+        res = []
+        for old, new, prop in move_result:
+            if prop.type() == fileprop.IMAGE:
+                res.append(new)
+        return res
+
     def __rotate_files(self, filenames):
         logging.info('Rotating')
         self.__rot = rotator.Rotator(
             self.__config,
-            filenames)
+            filenames,
+            self.__dryrun)
         self.__stat['stage'] = 'rotate'
 
         self.__rot.run()
