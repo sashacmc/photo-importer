@@ -11,7 +11,7 @@ import datetime
 import config
 
 
-IGNORE = 0 
+IGNORE = 0
 IMAGE = 1
 VIDEO = 2
 AUDIO = 3
@@ -68,7 +68,7 @@ class FileProp(object):
             return self.EXT_TO_TYPE[ext.lower()]
         except KeyError:
             logging.warning('Unknown ext: ' + ext)
-            return IGNORE 
+            return IGNORE
 
     def __time(self, fullname, name, tp):
         if tp not in (IMAGE, VIDEO, AUDIO):

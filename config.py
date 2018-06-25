@@ -25,6 +25,11 @@ class Config(object):
             'remove_empty_dirs': 1,
             'move_mode': 0,
             'threads_count': 2,
+        },
+        'server': {
+            'port': 8080,
+            'work_dir': 'web',
+            'remote_drive_reg': 'sd[d-z][0-9]'
         }
     }
 
