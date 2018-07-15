@@ -39,11 +39,19 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
                 res.append(dev)
         return res
 
-    def __mount_mount(self, path):
-        pass
+    def __mount_mount(self, dev):
+        if dev == '':
+            self.__bad_request_response('empty "d" param')
+            return None
+        logging.info('pmount')
+        return os.system('pmount --umask=000 /dev/%s' % dev)
 
-    def __mount_umount(self, path):
-        pass
+    def __mount_umount(self, dev):
+        if dev == '':
+            self.__bad_request_response('empty "d" param')
+            return None
+        logging.info('pumount')
+        return os.system('pumount /dev/%s' % dev)
 
     def __mount_request(self, params):
         try:
@@ -54,21 +62,22 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             return
 
         try:
-            path = params['p'][0]
+            dev = params['d'][0]
         except:
-            path = ''
+            dev = ''
 
         if action == 'list':
             result = self.__mount_get_list()
         elif action == 'mount':
-            result = self.__mount_mount(path)
+            result = self.__mount_mount(dev)
         elif action == 'umount':
-            result = self.__mount_umount(path)
+            result = self.__mount_umount(dev)
         else:
             self.__bad_request_response('unknown action %s' % action)
             return
 
-        self.__ok_response(result)
+        if result:
+            self.__ok_response(result)
 
     def __file_request(self, path):
         try:
@@ -89,6 +98,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             return path_params[0], {}
 
     def do_GET(self):
+        logging.info('do_GET' + self.path)
         try:
             path, params = self.__path_params()
             if path == '/mount':
@@ -114,6 +124,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             logging.exception(ex)
 
     def do_POST(self):
+        logging.info('do_POST' + self.path)
         try:
             path, params = self.__path_params()
 
@@ -156,8 +167,8 @@ def main():
 
     try:
         server = PhotoImporterServer(cfg)
-        server.serve_forever()
         logging.info("Photo importer server up.")
+        server.serve_forever()
     except KeyboardInterrupt:
         server.socket.close()
         logging.info("Photo importer server down.")
