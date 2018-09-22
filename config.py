@@ -28,8 +28,9 @@ class Config(object):
         },
         'server': {
             'port': 8080,
-            'work_dir': 'web',
-            'remote_drive_reg': 'sd[d-z][0-9]'
+            'web_path': 'web',
+            'remote_drive_reg': 'sd[d-z][0-9]',
+            'out_path': '/mnt/multimedia/NEW/',
         }
     }
 

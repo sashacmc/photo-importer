@@ -4,6 +4,7 @@ import os
 import re
 import cgi
 import json
+import psutil
 import logging
 import argparse
 import http.server
@@ -31,12 +32,32 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
     def __server_error_response(self, err):
         self.send_error(500, 'Internal Server Error: %s' % err)
 
+    def __get_mounted_list(self):
+        return {dp.device: dp.mountpoint for dp in psutil.disk_partitions()}
+
+    def __bytes_to_gbytes(self, b):
+        return round(b / 1024. / 1024. / 1024., 2)
+
     def __mount_get_list(self):
+        mount_list = self.__get_mounted_list()
         dev_list = os.listdir('/dev')
-        res = []
+        res = {}
         for dev in dev_list:
             if re.match(self.server.remote_drive_reg(), dev):
-                res.append(dev)
+                r = {}
+                r['path'] = mount_list.get('/dev/' + dev, '')
+                if r['path']:
+                    du = psutil.disk_usage(r['path'])
+                    r['size'] = self.__bytes_to_gbytes(du.total)
+                    r['usage'] = du.percent
+                    r['state'] = 'mounted'
+                    r['progress'] = 42
+                else:
+                    r['size'] = 0
+                    r['usage'] = 0
+                    r['state'] = 'unmounted'
+                    r['progress'] = 0
+                res[dev] = r
         return res
 
     def __mount_mount(self, dev):
@@ -66,6 +87,8 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
         except:
             dev = ''
 
+        result = None
+
         if action == 'list':
             result = self.__mount_get_list()
         elif action == 'mount':
@@ -76,12 +99,22 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             self.__bad_request_response('unknown action %s' % action)
             return
 
-        if result:
-            self.__ok_response(result)
+        self.__ok_response(result)
+
+    def __sysinfo_request(self, params):
+        res = {}
+        du = psutil.disk_usage(self.server.out_path())
+        mem = psutil.virtual_memory()
+        res['disk_size'] = self.__bytes_to_gbytes(du.total)
+        res['disk_usage'] = du.percent
+        res['cpu'] = psutil.cpu_percent()
+        res['mem_total'] = self.__bytes_to_gbytes(mem.total)
+        res['mem_usage'] = mem.percent
+        self.__ok_response(res)
 
     def __file_request(self, path):
         try:
-            fname = os.path.join(self.server.work_dir(), path)
+            fname = os.path.join(self.server.web_path(), path)
             with open(fname) as f:
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html')
@@ -98,11 +131,15 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             return path_params[0], {}
 
     def do_GET(self):
-        logging.info('do_GET' + self.path)
+        logging.info('do_GET: ' + self.path)
         try:
             path, params = self.__path_params()
             if path == '/mount':
                 self.__mount_request(params)
+                return
+
+            if path == '/sysinfo':
+                self.__sysinfo_request(params)
                 return
 
             if path == '/':
@@ -124,11 +161,11 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             logging.exception(ex)
 
     def do_POST(self):
-        logging.info('do_POST' + self.path)
+        logging.info('do_POST: ' + self.path)
         try:
             path, params = self.__path_params()
 
-            if self.path == '/mount':
+            if path == '/mount':
                 self.__mount_request(params)
                 return
         except Exception as ex:
@@ -140,15 +177,19 @@ class PhotoImporterServer(http.server.HTTPServer):
     def __init__(self, cfg):
         self.__cfg = cfg
         port = int(cfg['server']['port'])
-        self.__work_dir = cfg['server']['work_dir']
+        self.__web_path = cfg['server']['web_path']
         self.__remote_drive_reg = cfg['server']['remote_drive_reg']
+        self.__out_path = cfg['server']['out_path']
         super().__init__(('', port), PhotoImporterHandler)
 
-    def work_dir(self):
-        return self.__work_dir
+    def web_path(self):
+        return self.__web_path
 
     def remote_drive_reg(self):
         return self.__remote_drive_reg
+
+    def out_path(self):
+        return self.__out_path
 
 
 def args_parse():

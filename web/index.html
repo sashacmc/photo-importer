@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <title>Photo Importer Server</title>
+</head>
+<body>
+    <div>
+        <div class="table table-striped table-bordered" id="devTable"/>
+    </div>
+    <div id="sysInfo"/>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        function progress(p, caption, style)
+        {            
+            return "<div class=\"progress\">"
+                 + "<p class=\"text-monospace\">" + caption + "</p>"
+                 + "<div class=\"progress-bar " + style + "\" role=\"progressbar\" style=\"width: " + p + "%;\" aria-valuenow=\"" + p + "\" aria-valuemin=\"0\" aria-valuemax=\"100\">" 
+                 + p + "%</div>"
+                 + "</div>"
+        }
+
+        function setMountList(data)
+        {
+            var html = "<table>"
+            html += "<tr>" 
+                 + "<th>Device</th>"
+                 + "<th>Mount&nbsp;point</th>"
+                 + "<th>Status</th>"
+                 + "<th>Action</th>"
+                 + "<th>Size</th>"
+                 + "<th>Usage</th>"
+                 + "</tr>"
+            for (var dev in data) {
+                var action = ""
+                if (data[dev].state == "mounted") {
+                    action += "<input onclick=\"sendCommand('umount', '" + dev + "');\" type=button class=\"btn btn-primary btn-sm\" value=\"Unmount\"/> ";
+                    action += "<input onclick=\"sendCommand('import', '" + data[dev].path + "');\" type=button class=\"btn btn-success btn-sm\" value=\"Import\"/> ";
+                } else if (data[dev].state == "unmounted") {
+                    action = "<input onclick=\"sendCommand('mount', '" + dev + "');\" type=button class=\"btn btn-primary btn-sm\" value=\"Mount\"/> ";
+                } else if (data[dev].state == "process") {
+                    action = "<input onclick=\"sendCommand('stop', '" + data[dev].path + "');\" type=button class=\"btn btn-error btn-sm\" value=\"Stop\"/> ";
+                } else if (data[dev].state == "done") {
+                    action = "<input onclick=\"sendCommand('umount', '" + dev + "');\" type=button class=\"btn btn-primary btn-sm\" value=\"Unmount\"/> ";
+                }
+                var stat = ""
+                var p = data[dev].progress
+                if (p != 0) {
+                    stat = progress(p, "")
+                }
+                html += "<tr>"
+                     + "<td>" + dev + "</td>"
+                     + "<td>" + data[dev].path + "</td>"
+                     + "<td>" + stat + "</td>"
+                     + "<td>" + action + "</td>"
+                     + "<td>" + data[dev].size + "&nbsp;GB</td>"
+                     + "<td>" + data[dev].usage + "&nbsp;%</td>"
+                     + "</tr>"
+            }
+            html += "</table>"
+            $("#devTable").html(html)
+        }
+
+        function setSysInfo(data)
+        {
+            var html = ""
+            html += progress(data.cpu, "CPU: ", "bg-danger")
+            html += progress(data.mem_usage, "MEM: ", "bg-warning")
+            html += progress(data.disk_usage, "HDD: ", "bg-info")
+            $("#sysInfo").html(html)
+        }
+
+        function update()
+        {
+            $.ajax({  
+                url: "/mount?a=list",
+                cache: false,  
+                success: function(json) {  
+                    var data = eval(json);
+                    
+                    setMountList(data);
+                }  
+            });
+        }
+        
+        function updateSysInfo()
+        {
+            $.ajax({  
+                url: "/sysinfo",
+                cache: false,  
+                success: function(json) {  
+                    var data = eval(json);
+                    
+                    setSysInfo(data);
+                }  
+            });
+        }
+        
+        function sendCommand(cmd, dev)
+        {
+            if (cmd == "mount" || cmd == "umount") { 
+                $.ajax({
+                    url: "/mount?a=" + cmd + "&d=" + dev,
+                    type: "POST"
+                });
+            }
+        }
+         
+        function init()
+        {
+            update()
+            updateSysInfo()
+        }
+
+        $(document).ready(function() 
+        {
+            init();
+            setInterval('update()', 5000);  
+            setInterval('updateSysInfo()', 1000);  
+            setInterval('location.reload(true)', 3600000); //reload page every hour
+        });
+    </script>
+</body>
+</html>

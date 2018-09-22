@@ -5,3 +5,6 @@ Command line tools for photo importing/renaming/rotating
 * python3-exif
 * python3-progressbar
 * exiftran
+
+# Server module dependencies
+* python3-psutil
