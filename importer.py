@@ -36,7 +36,7 @@ class Importer(threading.Thread):
         self.__rotate_files(new_filenames)
 
         self.__stat['stage'] = 'done'
-        logging.info('Done')
+        logging.info('Done: %s' % str(self.status()))
 
     def __scan_files(self, input_path):
         self.__stat['stage'] = 'scan'

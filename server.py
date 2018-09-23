@@ -74,6 +74,9 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             self.__bad_request_response('empty "d" param')
             return None
         logging.info('pmount')
+        path = self.__get_mounted_list().get('/dev/' + dev, None)
+        if path:
+            self.server.import_done(path)
         return os.system('pmount --umask=000 /dev/%s' % dev)
 
     def __mount_umount(self, dev):
@@ -81,6 +84,9 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             self.__bad_request_response('empty "d" param')
             return None
         logging.info('pumount')
+        path = self.__get_mounted_list().get('/dev/' + dev, None)
+        if path:
+            self.server.import_done(path)
         return os.system('pumount /dev/%s' % dev)
 
     def __mount_request(self, params):
@@ -244,6 +250,7 @@ class PhotoImporterServer(http.server.HTTPServer):
         return self.__out_path
 
     def import_start(self, in_path):
+        logging.info('import_start: %s', in_path)
         if in_path in self.__importers:
             raise Exception('Already started')
 
@@ -260,6 +267,11 @@ class PhotoImporterServer(http.server.HTTPServer):
             return self.__importers[in_path].status()
         else:
             return None
+
+    def import_done(self, in_path):
+        logging.info('import_done: %s', in_path)
+        if in_path in self.__importers:
+            del self.__importers[in_path]
 
 
 def args_parse():
