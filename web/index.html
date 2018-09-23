@@ -108,7 +108,7 @@
             if (cmd == "mount" || cmd == "umount") { 
                 $.ajax({
                     url: "/mount?a=" + cmd + "&d=" + dev,
-                    type: "POST"
+                    type: "POST",
                     success: function() {  
                         update()
                     }  
@@ -117,7 +117,7 @@
             if (cmd == "start") { 
                 $.ajax({
                     url: "/import?a=" + cmd + "&p=" + dev,
-                    type: "POST"
+                    type: "POST",
                     success: function() {  
                         update()
                     }  
