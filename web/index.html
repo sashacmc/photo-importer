@@ -44,18 +44,16 @@
                 var action = ""
                 if (data[dev].state == "mounted") {
                     action += "<input onclick=\"sendCommand('umount', '" + dev + "');\" type=button class=\"btn btn-primary btn-sm\" value=\"Unmount\"/> ";
-                    action += "<input onclick=\"sendCommand('import', '" + data[dev].path + "');\" type=button class=\"btn btn-success btn-sm\" value=\"Import\"/> ";
+                    action += "<input onclick=\"sendCommand('start', '" + data[dev].path + "');\" type=button class=\"btn btn-success btn-sm\" value=\"Import\"/> ";
                 } else if (data[dev].state == "unmounted") {
                     action = "<input onclick=\"sendCommand('mount', '" + dev + "');\" type=button class=\"btn btn-primary btn-sm\" value=\"Mount\"/> ";
-                } else if (data[dev].state == "process") {
-                    action = "<input onclick=\"sendCommand('stop', '" + data[dev].path + "');\" type=button class=\"btn btn-error btn-sm\" value=\"Stop\"/> ";
                 } else if (data[dev].state == "done") {
                     action = "<input onclick=\"sendCommand('umount', '" + dev + "');\" type=button class=\"btn btn-primary btn-sm\" value=\"Unmount\"/> ";
                 }
-                var stat = ""
+                var stat = data[dev].state 
                 var p = data[dev].progress
                 if (p != 0) {
-                    stat = progress(p, "")
+                    stat += progress(p, "", "")
                 }
                 html += "<tr>"
                      + "<td>" + dev + "</td>"
@@ -63,7 +61,7 @@
                      + "<td>" + stat + "</td>"
                      + "<td>" + action + "</td>"
                      + "<td>" + data[dev].size + "&nbsp;GB</td>"
-                     + "<td>" + data[dev].usage + "&nbsp;%</td>"
+                     + "<td>" + progress(data[dev].usage, "", "bg-info") + "</td>"
                      + "</tr>"
             }
             html += "</table>"
@@ -111,6 +109,18 @@
                 $.ajax({
                     url: "/mount?a=" + cmd + "&d=" + dev,
                     type: "POST"
+                    success: function() {  
+                        update()
+                    }  
+                });
+            } else
+            if (cmd == "start") { 
+                $.ajax({
+                    url: "/import?a=" + cmd + "&p=" + dev,
+                    type: "POST"
+                    success: function() {  
+                        update()
+                    }  
                 });
             }
         }

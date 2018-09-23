@@ -18,7 +18,7 @@ class Config(object):
             'time_src_audio': 'name,attr',
             'file_ext_image': 'jpeg,jpg',
             'file_ext_video': 'mp4,mpg,mpeg,mov,avi',
-            'file_ext_audio': 'mp3,3gpp,m4a,wav',
+            'file_ext_audio': 'mp3,3gp,3gpp,m4a,wav',
             'file_ext_garbage': 'thm,ctg',
             'file_ext_ignore': 'ini,zip,db',
             'remove_garbage': 1,

@@ -11,6 +11,7 @@ import http.server
 
 import log
 import config
+import importer
 
 
 class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
@@ -46,17 +47,25 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             if re.match(self.server.remote_drive_reg(), dev):
                 r = {}
                 r['path'] = mount_list.get('/dev/' + dev, '')
+                r['progress'] = 0
                 if r['path']:
+                    stat = self.server.import_status(r['path'])
                     du = psutil.disk_usage(r['path'])
                     r['size'] = self.__bytes_to_gbytes(du.total)
                     r['usage'] = du.percent
-                    r['state'] = 'mounted'
-                    r['progress'] = 42
+                    if stat:
+                        stage = stat['stage']
+                        r['state'] = stage
+                        if stage == 'move' or stage == 'rotate':
+                            r['progress'] = \
+                                round(100. *
+                                      stat[stage]['processed'] / stat['total'])
+                    else:
+                        r['state'] = 'mounted'
                 else:
                     r['size'] = 0
                     r['usage'] = 0
                     r['state'] = 'unmounted'
-                    r['progress'] = 0
                 res[dev] = r
         return res
 
@@ -101,6 +110,40 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
 
         self.__ok_response(result)
 
+    def __import_start(self, in_path):
+        self.server.import_start(in_path)
+        return True
+
+    def __import_stop(self, dev):
+        pass
+
+    def __import_request(self, params):
+        try:
+            action = params['a'][0]
+        except Exception as ex:
+            self.__bad_request_response(str(ex))
+            logging.exception(ex)
+            return
+
+        try:
+            in_path = params['p'][0]
+        except:
+            self.__bad_request_response(str(ex))
+            logging.exception(ex)
+            return
+
+        result = None
+
+        if action == 'start':
+            result = self.__import_start(in_path)
+        elif action == 'stop':
+            result = self.__import_stop(in_path)
+        else:
+            self.__bad_request_response('unknown action %s' % action)
+            return
+
+        self.__ok_response(result)
+
     def __sysinfo_request(self, params):
         res = {}
         du = psutil.disk_usage(self.server.out_path())
@@ -138,6 +181,10 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
                 self.__mount_request(params)
                 return
 
+            if path == '/import':
+                self.__import_request(params)
+                return
+
             if path == '/sysinfo':
                 self.__sysinfo_request(params)
                 return
@@ -168,6 +215,10 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             if path == '/mount':
                 self.__mount_request(params)
                 return
+
+            if path == '/import':
+                self.__import_request(params)
+                return
         except Exception as ex:
             self.__server_error_response(str(ex))
             logging.exception(ex)
@@ -176,6 +227,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
 class PhotoImporterServer(http.server.HTTPServer):
     def __init__(self, cfg):
         self.__cfg = cfg
+        self.__importers = {}
         port = int(cfg['server']['port'])
         self.__web_path = cfg['server']['web_path']
         self.__remote_drive_reg = cfg['server']['remote_drive_reg']
@@ -190,6 +242,24 @@ class PhotoImporterServer(http.server.HTTPServer):
 
     def out_path(self):
         return self.__out_path
+
+    def import_start(self, in_path):
+        if in_path in self.__importers:
+            raise Exception('Already started')
+
+        self.__importers[in_path] = importer.Importer(
+            self.__cfg,
+            in_path,
+            self.out_path(),
+            False)
+
+        self.__importers[in_path].start()
+
+    def import_status(self, in_path):
+        if in_path in self.__importers:
+            return self.__importers[in_path].status()
+        else:
+            return None
 
 
 def args_parse():
