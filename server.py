@@ -14,12 +14,22 @@ import config
 import importer
 
 
+FIXED_IN_PATH_NAME = 'none'
+
+
 class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
+
     def __ok_response(self, result):
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
         self.end_headers()
         self.wfile.write(bytearray(json.dumps(result), 'utf-8'))
+
+    def __text_response(self, result):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/plain')
+        self.end_headers()
+        self.wfile.write(bytearray(result, 'utf-8'))
 
     def __bad_request_response(self, err):
         self.send_response(400)
@@ -42,9 +52,17 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
     def __mount_get_list(self):
         mount_list = self.__get_mounted_list()
         dev_list = os.listdir('/dev')
+
+        if self.server.fixed_in_path() != '':
+            mount_list['/dev/' + FIXED_IN_PATH_NAME] = \
+                self.server.fixed_in_path()
+            dev_list.append(FIXED_IN_PATH_NAME)
+
         res = {}
         for dev in dev_list:
-            if re.match(self.server.remote_drive_reg(), dev):
+            if re.match(self.server.remote_drive_reg(), dev) \
+                or dev == FIXED_IN_PATH_NAME:
+                
                 r = {}
                 r['path'] = mount_list.get('/dev/' + dev, '')
                 r['progress'] = 0
@@ -60,6 +78,15 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
                             r['progress'] = \
                                 round(100. *
                                       stat[stage]['processed'] / stat['total'])
+                        elif stage == 'done':
+                            cerr = stat['move']['errors'] + \
+                                stat['rotate']['errors']
+                            if cerr != 0:
+                                r['state'] = 'error'
+                                r['total'] = cerr
+                                r['details'] = str(stat)
+                            else:
+                                r['total'] = stat['total']
                     else:
                         r['state'] = 'mounted'
                 else:
@@ -123,6 +150,9 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
     def __import_stop(self, dev):
         pass
 
+    def __import_get_log(self, in_path):
+        return self.server.get_log(in_path)
+
     def __import_request(self, params):
         try:
             action = params['a'][0]
@@ -142,13 +172,17 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
 
         if action == 'start':
             result = self.__import_start(in_path)
+            self.__ok_response(result)
         elif action == 'stop':
             result = self.__import_stop(in_path)
+            self.__ok_response(result)
+        elif action == 'getlog':
+            result = self.__import_get_log(in_path)
+            self.__text_response(result)
         else:
             self.__bad_request_response('unknown action %s' % action)
             return
 
-        self.__ok_response(result)
 
     def __sysinfo_request(self, params):
         res = {}
@@ -163,14 +197,27 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
 
     def __file_request(self, path):
         try:
+            if (path[0]) == '/':
+                path = path[1:]
             fname = os.path.join(self.server.web_path(), path)
-            with open(fname) as f:
+            ext = os.path.splitext(fname)[1]
+            cont = ''
+            if ext == '.html':
+                cont = 'text/html'
+            elif ext == '.js':
+                cont = 'text/script'
+            elif ext == '.png':
+                cont = 'image/png'
+            else:
+                cont = 'text/none'
+            with open(fname, 'rb') as f:
                 self.send_response(200)
-                self.send_header('Content-type', 'text/html')
+                self.send_header('Content-type', cont)
                 self.end_headers()
-                self.wfile.write(bytearray(f.read(), 'utf-8'))
-        except IOError:
+                self.wfile.write(bytearray(f.read()))
+        except IOError as ex:
             self.__not_found_response()
+            logging.exception(ex)
 
     def __path_params(self):
         path_params = self.path.split('?')
@@ -199,15 +246,16 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
                 path = 'index.html'
 
             if '..' in path:
+                logging.warning('".." in path: ' + path)
                 self.__not_found_response()
                 return
 
             ext = os.path.splitext(path)[1]
-            if ext in ('.html', '.js') or path:
+            if ext in ('.html', '.js', '.png'):
                 self.__file_request(path)
                 return
 
-            logging.waring('Wrong path: ' + path)
+            logging.warning('Wrong path: ' + path)
             self.__not_found_response()
         except Exception as ex:
             self.__server_error_response(str(ex))
@@ -238,6 +286,7 @@ class PhotoImporterServer(http.server.HTTPServer):
         self.__web_path = cfg['server']['web_path']
         self.__remote_drive_reg = cfg['server']['remote_drive_reg']
         self.__out_path = cfg['server']['out_path']
+        self.__fixed_in_path = cfg['server']['in_path']
         super().__init__(('', port), PhotoImporterHandler)
 
     def web_path(self):
@@ -249,9 +298,12 @@ class PhotoImporterServer(http.server.HTTPServer):
     def out_path(self):
         return self.__out_path
 
+    def fixed_in_path(self):
+        return self.__fixed_in_path
+
     def import_start(self, in_path):
         logging.info('import_start: %s', in_path)
-        if in_path in self.__importers:
+        if in_path in self.__importers and in_path != self.fixed_in_path():
             raise Exception('Already started')
 
         self.__importers[in_path] = importer.Importer(
@@ -272,6 +324,12 @@ class PhotoImporterServer(http.server.HTTPServer):
         logging.info('import_done: %s', in_path)
         if in_path in self.__importers:
             del self.__importers[in_path]
+
+    def get_log(self, in_path):
+        if in_path in self.__importers:
+            return self.__importers[in_path].log_text()
+        else:
+            return '' 
 
 
 def args_parse():

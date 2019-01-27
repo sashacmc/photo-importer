@@ -39,21 +39,34 @@
                  + "<th>Action</th>"
                  + "<th>Size</th>"
                  + "<th>Usage</th>"
+                 + "<th>Log</th>"
                  + "</tr>"
             for (var dev in data) {
                 var action = ""
-                if (data[dev].state == "mounted") {
-                    action += "<input onclick=\"sendCommand('umount', '" + dev + "');\" type=button class=\"btn btn-primary btn-sm\" value=\"Unmount\"/> ";
-                    action += "<input onclick=\"sendCommand('start', '" + data[dev].path + "');\" type=button class=\"btn btn-success btn-sm\" value=\"Import\"/> ";
-                } else if (data[dev].state == "unmounted") {
-                    action = "<input onclick=\"sendCommand('mount', '" + dev + "');\" type=button class=\"btn btn-primary btn-sm\" value=\"Mount\"/> ";
-                } else if (data[dev].state == "done") {
-                    action = "<input onclick=\"sendCommand('umount', '" + dev + "');\" type=button class=\"btn btn-primary btn-sm\" value=\"Unmount\"/> ";
+                var state = data[dev].state
+                if (dev == "none") {
+                    if (state == "mounted" || state == "done") {
+                        action += "<input onclick=\"sendCommand('start', '" + data[dev].path + "');\" type=button class=\"btn btn-success btn-sm\" value=\"Import\"/> ";
+                    }
+                } else {
+                    if (state == "mounted") {
+                        action += "<input onclick=\"sendCommand('umount', '" + dev + "');\" type=button class=\"btn btn-primary btn-sm\" value=\"Unmount\"/> ";
+                        action += "<input onclick=\"sendCommand('start', '" + data[dev].path + "');\" type=button class=\"btn btn-success btn-sm\" value=\"Import\"/> ";
+                    } else if (state == "unmounted") {
+                        action = "<input onclick=\"sendCommand('mount', '" + dev + "');\" type=button class=\"btn btn-primary btn-sm\" value=\"Mount\"/> ";
+                    } else if (state == "done") {
+                        action = "<input onclick=\"sendCommand('umount', '" + dev + "');\" type=button class=\"btn btn-primary btn-sm\" value=\"Unmount\"/> ";
+                    }
                 }
-                var stat = data[dev].state 
+                var stat = state 
                 var p = data[dev].progress
                 if (p != 0) {
                     stat += progress(p, "", "")
+                }
+                if (state == "done") {
+                    stat += "<br/><font size=\"-1\">(total: " + data[dev].total + ")<font>"
+                } else if (state == "error") {
+                    stat += "<br/><font size=\"-2\">(" + data[dev].details + ")<font>"
                 }
                 html += "<tr>"
                      + "<td>" + dev + "</td>"
@@ -62,6 +75,7 @@
                      + "<td>" + action + "</td>"
                      + "<td>" + data[dev].size + "&nbsp;GB</td>"
                      + "<td>" + progress(data[dev].usage, "", "bg-info") + "</td>"
+                     + "<td><a href=\"import?a=getlog&p=" + data[dev].path + "\"><img src=\"log.png\"/></a></td>"
                      + "</tr>"
             }
             html += "</table>"

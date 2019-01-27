@@ -31,6 +31,7 @@ class Config(object):
             'web_path': 'web',
             'remote_drive_reg': 'sd[d-z][0-9]',
             'out_path': '/mnt/multimedia/NEW/',
+            'in_path': '',
         }
     }
 

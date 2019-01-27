@@ -1,7 +1,11 @@
+import io
 import os
 import sys
 import time
 import logging
+
+LOGFMT = '[%(asctime)s] [%(levelname)s] %(message)s'
+DATEFMT = '%Y-%m-%d %H:%M:%S'
 
 
 def calcLogName():
@@ -18,15 +22,11 @@ def initLogger(filename=None):
             os.makedirs(os.path.split(filename)[0])
         except OSError:
             pass
-        # init file logger and console
         fh = logging.FileHandler(filename, 'a')
     else:
-        # init only console
         fh = logging.StreamHandler()
 
-    form = '[%(asctime)s] [%(levelname)s] %(message)s'
-    datefmt = '%Y-%m-%d %H:%M:%S'
-    fmt = logging.Formatter(form, datefmt)
+    fmt = logging.Formatter(LOGFMT, DATEFMT)
     fh.setFormatter(fmt)
     logging.getLogger().addHandler(fh)
 
@@ -34,3 +34,21 @@ def initLogger(filename=None):
 
     logging.info('Log file: ' + str(filename))
     logging.debug(str(sys.argv))
+
+
+class MemLogger(object):
+    def __init__(self, name):
+        self.__name = name
+        fmt = logging.Formatter(LOGFMT, DATEFMT)
+        self.__stream = io.StringIO()
+        self.__handler = logging.StreamHandler(self.__stream)
+        self.__handler.setFormatter(fmt)
+        logging.getLogger().addHandler(self.__handler)
+        logging.info("MemLogger " + self.__name + " started")
+
+    def __del__(self):
+        logging.getLogger().removeHandler(self.__handler)
+        logging.info("MemLogger " + self.__name + " finished")
+
+    def get_text(self):
+        return self.__stream.getvalue()

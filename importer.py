@@ -4,6 +4,7 @@ import os
 import logging
 import threading
 
+import log
 import mover
 import config
 import rotator
@@ -20,6 +21,7 @@ class Importer(threading.Thread):
         self.__mov = None
         self.__rot = None
         self.__stat = {'stage': ''}
+        self.__log = log.MemLogger(input_path)
 
     def run(self):
         logging.info(
@@ -109,6 +111,9 @@ class Importer(threading.Thread):
             self.__stat['rotate'] = self.__rot.status()
 
         return self.__stat
+
+    def log_text(self):
+        return self.__log.get_text()
 
 
 if __name__ == '__main__':
