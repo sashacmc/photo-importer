@@ -163,7 +163,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
 
         try:
             in_path = params['p'][0]
-        except:
+        except Exception as ex:
             self.__bad_request_response(str(ex))
             logging.exception(ex)
             return
