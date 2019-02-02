@@ -35,7 +35,7 @@ class Rotator(object):
         ok = False
         try:
             cmd = 'exiftran -aip "%s"' % filename
-            logging.info('rotate: %s' % cmd)
+            logging.debug('rotate: %s' % cmd)
 
             if self.__dryrun:
                 return True

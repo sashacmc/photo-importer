@@ -61,8 +61,8 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
         res = {}
         for dev in dev_list:
             if re.match(self.server.remote_drive_reg(), dev) \
-                or dev == FIXED_IN_PATH_NAME:
-                
+               or dev == FIXED_IN_PATH_NAME:
+
                 r = {}
                 r['path'] = mount_list.get('/dev/' + dev, '')
                 r['progress'] = 0
@@ -100,7 +100,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
         if dev == '':
             self.__bad_request_response('empty "d" param')
             return None
-        logging.info('pmount')
+        logging.debug('pmount')
         path = self.__get_mounted_list().get('/dev/' + dev, None)
         if path:
             self.server.import_done(path)
@@ -110,7 +110,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
         if dev == '':
             self.__bad_request_response('empty "d" param')
             return None
-        logging.info('pumount')
+        logging.debug('pumount')
         path = self.__get_mounted_list().get('/dev/' + dev, None)
         if path:
             self.server.import_done(path)
@@ -183,7 +183,6 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             self.__bad_request_response('unknown action %s' % action)
             return
 
-
     def __sysinfo_request(self, params):
         res = {}
         du = psutil.disk_usage(self.server.out_path())
@@ -227,7 +226,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             return path_params[0], {}
 
     def do_GET(self):
-        logging.info('do_GET: ' + self.path)
+        logging.debug('do_GET: ' + self.path)
         try:
             path, params = self.__path_params()
             if path == '/mount':
@@ -262,7 +261,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             logging.exception(ex)
 
     def do_POST(self):
-        logging.info('do_POST: ' + self.path)
+        logging.debug('do_POST: ' + self.path)
         try:
             path, params = self.__path_params()
 
@@ -329,7 +328,7 @@ class PhotoImporterServer(http.server.HTTPServer):
         if in_path in self.__importers:
             return self.__importers[in_path].log_text()
         else:
-            return '' 
+            return ''
 
 
 def args_parse():

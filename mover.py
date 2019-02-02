@@ -52,7 +52,7 @@ class Mover(object):
             if self.__remove_garbage:
                 if not self.__dryrun:
                     os.remove(fname)
-                logging.info('removed "%s"' % fname)
+                logging.debug('removed "%s"' % fname)
                 self.__stat['removed'] += 1
             else:
                 self.__stat['skipped'] += 1
@@ -73,18 +73,18 @@ class Mover(object):
             if not os.path.isdir(path):
                 if not self.__dryrun:
                     os.makedirs(path)
-                logging.info('dir "%s" created' % path)
+                logging.debug('dir "%s" created' % path)
 
             fullname = prop.out_name_full(path)
             if self.__move_mode:
                 if not self.__dryrun:
                     shutil.move(fname, fullname)
-                logging.info('"%s" moved "%s"' % (fname, fullname))
+                logging.debug('"%s" moved "%s"' % (fname, fullname))
                 self.__stat['moved'] += 1
             else:
                 if not self.__dryrun:
                     shutil.copy2(fname, fullname)
-                logging.info('"%s" copied "%s"' % (fname, fullname))
+                logging.debug('"%s" copied "%s"' % (fname, fullname))
                 self.__stat['copied'] += 1
 
             return fullname
@@ -96,7 +96,7 @@ class Mover(object):
                 new_fname = prop.out_name_full()
                 if not self.__dryrun:
                     os.rename(fname, new_fname)
-                logging.info('"%s" renamed "%s"' % (fname, new_fname))
+                logging.debug('"%s" renamed "%s"' % (fname, new_fname))
                 self.__stat['moved'] += 1
                 return new_fname
 
