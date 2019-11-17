@@ -94,7 +94,7 @@
         function update()
         {
             $.ajax({  
-                url: "/mount?a=list",
+                url: "mount?a=list",
                 cache: false,  
                 success: function(json) {  
                     var data = eval(json);
@@ -107,7 +107,7 @@
         function updateSysInfo()
         {
             $.ajax({  
-                url: "/sysinfo",
+                url: "sysinfo",
                 cache: false,  
                 success: function(json) {  
                     var data = eval(json);
@@ -121,7 +121,7 @@
         {
             if (cmd == "mount" || cmd == "umount") { 
                 $.ajax({
-                    url: "/mount?a=" + cmd + "&d=" + dev,
+                    url: "mount?a=" + cmd + "&d=" + dev,
                     type: "POST",
                     success: function() {  
                         update()
@@ -130,7 +130,7 @@
             } else
             if (cmd == "start") { 
                 $.ajax({
-                    url: "/import?a=" + cmd + "&p=" + dev,
+                    url: "import?a=" + cmd + "&p=" + dev,
                     type: "POST",
                     success: function() {  
                         update()
