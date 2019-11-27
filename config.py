@@ -32,6 +32,7 @@ class Config(object):
             'remote_drive_reg': 'sd[d-z][0-9]',
             'out_path': '/mnt/multimedia/NEW/',
             'in_path': '',
+            'log_file': '/var/log/photo-importer-server.log',
         }
     }
 

@@ -126,7 +126,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
 
         try:
             dev = params['d'][0]
-        except:
+        except Exception:
             dev = ''
 
         result = None
@@ -334,7 +334,7 @@ class PhotoImporterServer(http.server.HTTPServer):
 def args_parse():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--config', help='Config file')
-    parser.add_argument('-l', '--logfile', help='Log file', default='slog.txt')
+    parser.add_argument('-l', '--logfile', help='Log file')
     return parser.parse_args()
 
 
@@ -343,7 +343,12 @@ def main():
 
     cfg = config.Config(args.config)
 
-    log.initLogger(args.logfile)
+    if args.logfile:
+        logfile = args.logfile
+    else:
+        logfile = cfg['server']['log_file']
+
+    log.initLogger(logfile)
 
     try:
         server = PhotoImporterServer(cfg)
