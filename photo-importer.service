@@ -1,0 +1,12 @@
+[Unit]
+Description=Photo Importer Server Service
+After=multi-user.target
+Conflicts=getty@tty1.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/photo-importer-server -c /etc/photo-importer.cfg
+StandardInput=tty-force
+
+[Install]
+WantedBy=multi-user.target
