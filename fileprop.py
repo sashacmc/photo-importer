@@ -189,6 +189,7 @@ class FilePropRes(object):
         return self.__prop_ptr._out_name_full(
             path, self.__out_name, self.__ext)
 
+
 if __name__ == '__main__':
     import sys
 
