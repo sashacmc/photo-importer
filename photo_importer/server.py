@@ -146,8 +146,8 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
 
         self.__ok_response(result)
 
-    def __import_start(self, in_path):
-        self.server.import_start(in_path)
+    def __import_start(self, in_path, out_path):
+        self.server.import_start(in_path, out_path)
         return True
 
     def __import_stop(self, dev):
@@ -159,22 +159,21 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
     def __import_request(self, params):
         try:
             action = params['a'][0]
-        except Exception as ex:
-            self.__bad_request_response(str(ex))
-            logging.exception(ex)
-            return
-
-        try:
             in_path = params['p'][0]
         except Exception as ex:
             self.__bad_request_response(str(ex))
             logging.exception(ex)
             return
 
+        try:
+            out_path = params['o'][0]
+        except Exception as ex:
+            out_path = self.server.out_path()
+
         result = None
 
         if action == 'start':
-            result = self.__import_start(in_path)
+            result = self.__import_start(in_path, out_path)
             self.__ok_response(result)
         elif action == 'stop':
             result = self.__import_stop(in_path)
@@ -187,8 +186,12 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             return
 
     def __sysinfo_request(self, params):
+        try:
+            path = params['p'][0]
+        except Exception as ex:
+            path = self.server.out_path()
         res = {}
-        du = psutil.disk_usage(self.server.out_path())
+        du = psutil.disk_usage(path)
         mem = psutil.virtual_memory()
         res['disk_size'] = self.__bytes_to_gbytes(du.total)
         res['disk_usage'] = du.percent
@@ -303,7 +306,7 @@ class PhotoImporterServer(http.server.HTTPServer):
     def fixed_in_path(self):
         return self.__fixed_in_path
 
-    def import_start(self, in_path):
+    def import_start(self, in_path, out_path):
         logging.info('import_start: %s', in_path)
         if in_path in self.__importers and in_path != self.fixed_in_path():
             raise Exception('Already started')
@@ -311,7 +314,7 @@ class PhotoImporterServer(http.server.HTTPServer):
         self.__importers[in_path] = importer.Importer(
             self.__cfg,
             in_path,
-            self.out_path(),
+            out_path,
             False)
 
         self.__importers[in_path].start()
