@@ -4,7 +4,7 @@ import os
 import shutil
 import logging
 
-import fileprop
+from photo_importer import fileprop
 
 
 class Mover(object):

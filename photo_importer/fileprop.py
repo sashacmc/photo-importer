@@ -8,7 +8,7 @@ import logging
 import exifread
 import datetime
 
-import config
+from photo_importer import config
 
 
 IGNORE = 0

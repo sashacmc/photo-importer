@@ -4,7 +4,7 @@ import logging
 import subprocess
 import concurrent.futures
 
-import config
+from photo_importer import config
 
 
 class Rotator(object):

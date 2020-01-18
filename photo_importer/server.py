@@ -3,15 +3,18 @@
 import os
 import re
 import cgi
+import sys
 import json
 import psutil
 import logging
 import argparse
 import http.server
 
-import log
-import config
-import importer
+sys.path.insert(0, os.path.abspath('..'))
+
+from photo_importer import log
+from photo_importer import config
+from photo_importer import importer
 
 
 FIXED_IN_PATH_NAME = 'none'

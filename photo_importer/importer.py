@@ -4,11 +4,11 @@ import os
 import logging
 import threading
 
-import log
-import mover
-import config
-import rotator
-import fileprop
+from photo_importer import log
+from photo_importer import mover
+from photo_importer import config
+from photo_importer import rotator
+from photo_importer import fileprop
 
 
 class Importer(threading.Thread):

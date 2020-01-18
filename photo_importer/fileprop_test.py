@@ -1,9 +1,14 @@
 #!/usr/bin/python3
 
+import os 
+import sys
 import unittest
-import config
-import fileprop
 import datetime
+
+sys.path.insert(0, os.path.abspath('..'))
+
+from photo_importer import config
+from photo_importer import fileprop
 
 
 class TestFileProp(unittest.TestCase):
