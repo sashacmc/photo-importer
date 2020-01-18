@@ -1,13 +1,17 @@
 #!/usr/bin/python3
 
-import log
+import os
+import sys
 import logging
 import argparse
 import threading
 import progressbar
 
-import config
-import importer
+sys.path.insert(0, os.path.abspath('..'))
+
+from photo_importer import log
+from photo_importer import config
+from photo_importer import importer
 
 
 class ProgressBar(threading.Thread):
