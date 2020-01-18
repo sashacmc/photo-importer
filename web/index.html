@@ -55,7 +55,7 @@
                         action += "<input onclick=\"sendCommand('start', '" + data[dev].path + "');\" type=button class=\"btn btn-success btn-sm\" value=\"Import\"/> ";
                     } else if (state == "unmounted") {
                         action = "<input onclick=\"sendCommand('mount', '" + dev + "');\" type=button class=\"btn btn-primary btn-sm\" value=\"Mount\"/> ";
-                    } else if (state == "done") {
+                    } else if (state == "done" || state == "error") {
                         action = "<input onclick=\"sendCommand('umount', '" + dev + "');\" type=button class=\"btn btn-primary btn-sm\" value=\"Unmount\"/> ";
                     }
                 }
