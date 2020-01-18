@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
-import configparser
 import os
+import configparser
 
 
 class Config(object):
@@ -28,11 +28,11 @@ class Config(object):
         },
         'server': {
             'port': 8080,
-            'web_path': 'web',
+            'web_path': '../web',
             'remote_drive_reg': 'sd[d-z][0-9]',
             'out_path': '/mnt/multimedia/NEW/',
             'in_path': '',
-            'log_file': '/var/log/photo-importer-server.log',
+            'log_file': 'photo-importer-server.log',
         }
     }
 
