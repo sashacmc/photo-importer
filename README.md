@@ -67,6 +67,9 @@ Will import (by default move, but it can be changed in config) files from /path/
 
 ## Configuration
 Server config file located in /etc/photo-importer.cfg
+
 Command line tool config file located in ~/.photo-importer.cfg
+
 Also config file can be specified by mean of -c command line option.
+
 For options details see comments in config file.
