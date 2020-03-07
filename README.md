@@ -45,3 +45,12 @@ photo-importer /path/to/media/files /output/path
 Will import (by default move, but it can be changed in config) files from /path/to/media/files to /output/path with date hierarchy creation and reanaming/rotating
 
 ![Move example](https://user-images.githubusercontent.com/28735879/76139964-eba27280-6055-11ea-988f-aa71cda7ba36.png)
+
+### Web Interface
+  * attach usb-drive / usert memory card
+  * open http://servername:8080
+  * click "Mount"
+  * click "Import"
+  * click "Unmount"
+
+![Web interface example](https://user-images.githubusercontent.com/28735879/76140174-f1995300-6057-11ea-8718-19c38650c786.png)
