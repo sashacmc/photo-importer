@@ -64,3 +64,9 @@ Will import (by default move, but it can be changed in config) files from /path/
   * click "Unmount"
 
 ![Web interface example](https://user-images.githubusercontent.com/28735879/76140174-f1995300-6057-11ea-8718-19c38650c786.png)
+
+## Configuration
+Server config file located in /etc/photo-importer.cfg
+Command line tool config file located in ~/.photo-importer.cfg
+Also config file can be specified by mean of -c command line option.
+For options details see comments in config file.
