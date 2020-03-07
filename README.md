@@ -1,8 +1,17 @@
 # photo-importer
 Command line tools for photo importing/renaming/rotating
+### Features:
+  * Media files scan
+  * Time when picture was taken detection (by EXIF, by file name, by file attributes)
+  * Media files moving/copying to configurable hierarchy 
+  * Lossless rotations (via exiftran)
 
 # photo-importer-server
 Standalone web server for fast media import for headless computer
+### Features:
+  * Mounted storages detection (by path mask)
+  * Storages mount/unmount (via pmount)
+  * The same as photo-importer but without console
 
 ## Installation
 
@@ -16,6 +25,7 @@ Standalone web server for fast media import for headless computer
   * python3-progressbar
   * python3-psutil
   * exiftran
+  * pmount
 
 
 ### Installation Options:
