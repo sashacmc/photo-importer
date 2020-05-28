@@ -21,7 +21,7 @@ Standalone web server for fast media import for headless computer
   * Debian based Linux (Other Linux versions not officially supported, but might work)
 
 ### Dependencies:
-  * python3-exif
+  * PyExifTool (pip3 install PyExifTool)
   * python3-progressbar
   * python3-psutil
   * exiftran

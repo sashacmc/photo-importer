@@ -5,10 +5,8 @@ import re
 import stat
 import time
 import logging
-import exifread
+import exiftool
 import datetime
-
-from photo_importer import config
 
 
 IGNORE = 0
@@ -49,10 +47,18 @@ class FileProp(object):
 
     EXT_TO_TYPE = {}
 
+    DATE_TAGS = [
+        'EXIF:DateTimeOriginal',
+        'H264:DateTimeOriginal',
+        'QuickTime:MediaCreateDate'
+    ]
+
     def __init__(self, config):
         self.__config = config
         self.__prepare_ext_to_type()
         self.__out_list = set()
+        self.__exiftool = exiftool.ExifTool()
+        self.__exiftool.start()
 
     def __prepare_ext_to_type(self):
         self.EXT_TO_TYPE = {}
@@ -106,11 +112,21 @@ class FileProp(object):
 
     def __time_by_exif(self, fullname):
         try:
-            with open(fullname, 'rb') as f:
-                tags = exifread.process_file(f)
-                strtime = tags['EXIF DateTimeOriginal'].values
-                return datetime.datetime.strptime(strtime, '%Y:%m:%d %H:%M:%S')
-        except (FileNotFoundError, KeyError) as ex:
+            metadata = self.__exiftool.get_metadata(fullname)
+            for tag in self.DATE_TAGS:
+                if tag in metadata:
+                    md = metadata[tag]
+                    pos = md.find('+')
+                    if pos > 0:
+                        md = md[0:pos]
+                    return datetime.datetime.strptime(md, '%Y:%m:%d %H:%M:%S')
+
+            logging.warning('time by exif (%s) not found tags count: %s' %
+                            (fullname, len(metadata)))
+            for tag, val in metadata.items():
+                logging.debug('%s: %s' % (tag, val))
+            return None
+        except Exception as ex:
             logging.warning('time by exif (%s) exception: %s' % (fullname, ex))
 
     def __time_by_attr(self, fullname):
