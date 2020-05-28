@@ -4,6 +4,7 @@ import os
 import re
 import cgi
 import sys
+import glob
 import json
 import psutil
 import logging
@@ -52,9 +53,21 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
     def __bytes_to_gbytes(self, b):
         return round(b / 1024. / 1024. / 1024., 2)
 
+    def __get_removable_devices(self):
+        res = []
+        for path in glob.glob('/sys/block/*/device'):
+            dev = re.sub('.*/(.*?)/device', '\g<1>', path)
+            with open('/sys/block/%s/removable' % (dev,)) as f:
+                if f.read(1) != '1':
+                    continue
+            for ppath in glob.glob('/sys/block/%s/%s*' % (dev, dev)):
+                pdev = os.path.split(ppath)[1]
+                res.append(pdev)
+        return res
+
     def __mount_get_list(self):
         mount_list = self.__get_mounted_list()
-        dev_list = os.listdir('/dev')
+        dev_list = self.__get_removable_devices()
 
         if self.server.fixed_in_path() != '':
             mount_list['/dev/' + FIXED_IN_PATH_NAME] = \
@@ -63,40 +76,37 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
 
         res = {}
         for dev in dev_list:
-            if re.match(self.server.remote_drive_reg(), dev) \
-               or dev == FIXED_IN_PATH_NAME:
-
-                r = {}
-                r['path'] = mount_list.get('/dev/' + dev, '')
-                r['progress'] = 0
-                if r['path']:
-                    stat = self.server.import_status(r['path'])
-                    du = psutil.disk_usage(r['path'])
-                    r['size'] = self.__bytes_to_gbytes(du.total)
-                    r['usage'] = du.percent
-                    if stat:
-                        stage = stat['stage']
-                        r['state'] = stage
-                        if stage == 'move' or stage == 'rotate':
-                            r['progress'] = \
-                                round(100. *
-                                      stat[stage]['processed'] / stat['total'])
-                        elif stage == 'done':
-                            cerr = stat['move']['errors'] + \
-                                stat['rotate']['errors']
-                            if cerr != 0:
-                                r['state'] = 'error'
-                                r['total'] = cerr
-                                r['details'] = str(stat)
-                            else:
-                                r['total'] = stat['total']
-                    else:
-                        r['state'] = 'mounted'
+            r = {}
+            r['path'] = mount_list.get('/dev/' + dev, '')
+            r['progress'] = 0
+            if r['path']:
+                stat = self.server.import_status(r['path'])
+                du = psutil.disk_usage(r['path'])
+                r['size'] = self.__bytes_to_gbytes(du.total)
+                r['usage'] = du.percent
+                if stat:
+                    stage = stat['stage']
+                    r['state'] = stage
+                    if stage == 'move' or stage == 'rotate':
+                        r['progress'] = \
+                            round(100. *
+                                  stat[stage]['processed'] / stat['total'])
+                    elif stage == 'done':
+                        cerr = stat['move']['errors'] + \
+                            stat['rotate']['errors']
+                        if cerr != 0:
+                            r['state'] = 'error'
+                            r['total'] = cerr
+                            r['details'] = str(stat)
+                        else:
+                            r['total'] = stat['total']
                 else:
-                    r['size'] = 0
-                    r['usage'] = 0
-                    r['state'] = 'unmounted'
-                res[dev] = r
+                    r['state'] = 'mounted'
+            else:
+                r['size'] = 0
+                r['usage'] = 0
+                r['state'] = 'unmounted'
+            res[dev] = r
         return res
 
     def __mount_mount(self, dev):
@@ -289,16 +299,12 @@ class PhotoImporterServer(http.server.HTTPServer):
         self.__importers = {}
         port = int(cfg['server']['port'])
         self.__web_path = cfg['server']['web_path']
-        self.__remote_drive_reg = cfg['server']['remote_drive_reg']
         self.__out_path = cfg['server']['out_path']
         self.__fixed_in_path = cfg['server']['in_path']
         super().__init__(('', port), PhotoImporterHandler)
 
     def web_path(self):
         return self.__web_path
-
-    def remote_drive_reg(self):
-        return self.__remote_drive_reg
 
     def out_path(self):
         return self.__out_path
