@@ -208,6 +208,12 @@ class FilePropRes(object):
 
 if __name__ == '__main__':
     import sys
+    sys.path.insert(0, os.path.abspath('..'))
 
-    fp = FileProp(config.Config(), sys.argv[1])
+    from photo_importer import log
+    from photo_importer import config
+
+    log.initLogger(None, logging.DEBUG)
+
+    fp = FileProp(config.Config()).get(sys.argv[1])
     print(fp.type(), fp.time(), fp.ok())

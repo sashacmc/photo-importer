@@ -16,7 +16,7 @@ def calcLogName():
     return os.path.join(defpath, fname)
 
 
-def initLogger(filename=None):
+def initLogger(filename=None, level=logging.INFO):
     if filename is not None:
         try:
             os.makedirs(os.path.split(filename)[0])
@@ -30,7 +30,7 @@ def initLogger(filename=None):
     fh.setFormatter(fmt)
     logging.getLogger().addHandler(fh)
 
-    logging.getLogger().setLevel(logging.INFO)
+    logging.getLogger().setLevel(level)
 
     logging.info('Log file: ' + str(filename))
     logging.debug(str(sys.argv))
