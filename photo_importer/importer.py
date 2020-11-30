@@ -1,14 +1,17 @@
 #!/usr/bin/python3
 
 import os
+import sys
 import logging
 import threading
 
-from photo_importer import log
-from photo_importer import mover
-from photo_importer import config
-from photo_importer import rotator
-from photo_importer import fileprop
+sys.path.insert(0, os.path.abspath('..'))
+
+from photo_importer import log  # noqa
+from photo_importer import mover  # noqa
+from photo_importer import config  # noqa
+from photo_importer import rotator  # noqa
+from photo_importer import fileprop  # noqa
 
 
 class Importer(threading.Thread):
@@ -118,7 +121,6 @@ class Importer(threading.Thread):
 
 if __name__ == '__main__':
     import sys
-    import log
 
     log.initLogger()
 

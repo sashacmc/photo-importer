@@ -9,9 +9,9 @@ import progressbar
 
 sys.path.insert(0, os.path.abspath('..'))
 
-from photo_importer import log
-from photo_importer import config
-from photo_importer import importer
+from photo_importer import log  # noqa
+from photo_importer import config  # noqa
+from photo_importer import importer  # noqa
 
 
 class ProgressBar(threading.Thread):

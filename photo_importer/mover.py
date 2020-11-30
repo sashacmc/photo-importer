@@ -22,10 +22,12 @@ class Mover(object):
         self.__dryrun = dryrun
         self.__move_mode = int(config['main']['move_mode'])
         self.__remove_garbage = int(config['main']['remove_garbage'])
+        self.__umask = int(config['main']['umask'], 8)
         self.__stat = {'total': len(filenames)}
         self.__file_prop = fileprop.FileProp(self.__config)
 
     def run(self):
+        os.umask(self.__umask)
         self.__stat['moved'] = 0
         self.__stat['copied'] = 0
         self.__stat['removed'] = 0

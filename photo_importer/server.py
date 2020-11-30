@@ -13,9 +13,9 @@ import http.server
 
 sys.path.insert(0, os.path.abspath('..'))
 
-from photo_importer import log
-from photo_importer import config
-from photo_importer import importer
+from photo_importer import log  # noqa
+from photo_importer import config  # noqa
+from photo_importer import importer  # noqa
 
 
 FIXED_IN_PATH_NAME = 'none'

@@ -1,14 +1,14 @@
 #!/usr/bin/python3
 
-import os 
+import os
 import sys
 import unittest
 import datetime
 
 sys.path.insert(0, os.path.abspath('..'))
 
-from photo_importer import config
-from photo_importer import fileprop
+from photo_importer import config  # noqa
+from photo_importer import fileprop  # noqa
 
 
 class TestFileProp(unittest.TestCase):
@@ -131,6 +131,12 @@ class TestFileProp(unittest.TestCase):
         fp = self.fp.get('AUD-20171122-WA0000.m4a')
         self.assertEqual(fp.type(), fileprop.AUDIO)
         self.assertEqual(fp.time(), datetime.datetime(2017, 11, 22))
+        self.assertEqual(fp.ok(), False)
+
+    def test_phone4_audio(self):
+        fp = self.fp.get('2020_05_12_15_07_20.mp3')
+        self.assertEqual(fp.type(), fileprop.AUDIO)
+        self.assertEqual(fp.time(), datetime.datetime(2020, 5, 12, 15, 7, 20))
         self.assertEqual(fp.ok(), False)
 
     # garbage
