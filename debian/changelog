@@ -1,3 +1,10 @@
+photo-importer (1.0.3) stable; urgency=medium
+
+  * Use system mv and cp in place of python commands
+  * Add errors check in console script
+
+ -- Alexander Bushnev <Alexander@Bushnev.ru>  Sun, 27 Dec 2020 12:39:03 +0100
+
 photo-importer (1.0.2) stable; urgency=medium
 
   * Improve removable device detection
