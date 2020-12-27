@@ -91,7 +91,10 @@ def main():
     imp.join()
     pbar.join()
 
-    logging.info('status: %s' % str(imp.status()))
+    status = imp.status()
+    logging.info('status: %s' % str(status))
+    if status['move']['errors'] != 0 or status['rotate']['errors'] != 0:
+        print('Some errors found. Please check log file.')
 
 
 if __name__ == '__main__':
