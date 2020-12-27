@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
 import os
-import shutil
 import logging
+import subprocess
 
 from photo_importer import fileprop
 
@@ -79,13 +79,15 @@ class Mover(object):
 
             fullname = prop.out_name_full(path)
             if self.__move_mode:
-                if not self.__dryrun:
-                    shutil.move(fname, fullname)
+                if not self.__run(["mv", fname, fullname]):
+                    self.__stat['errors'] += 1
+                    return None
                 logging.info('"%s" moved "%s"' % (fname, fullname))
                 self.__stat['moved'] += 1
             else:
-                if not self.__dryrun:
-                    shutil.copy2(fname, fullname)
+                if not self.__run(["cp", "-a", fname, fullname]):
+                    self.__stat['errors'] += 1
+                    return None
                 logging.info('"%s" copied "%s"' % (fname, fullname))
                 self.__stat['copied'] += 1
 
@@ -101,6 +103,26 @@ class Mover(object):
                 logging.info('"%s" renamed "%s"' % (fname, new_fname))
                 self.__stat['moved'] += 1
                 return new_fname
+
+    def __run(self, args):
+        if self.__dryrun:
+            return True
+
+        with subprocess.Popen(
+                args,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE) as proc:
+            proc.wait()
+            info = proc.stdout.read().strip()
+            if info:
+                logging.info(info.decode("utf-8"))
+            err = proc.stderr.read().strip()
+            if err:
+                logging.error(err.decode("utf-8"))
+            elif proc.returncode != 0:
+                logging.error('%s failed with code %i' %
+                              (args[0], proc.returncode))
+            return proc.returncode == 0
 
     def status(self):
         return self.__stat
