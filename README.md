@@ -76,4 +76,5 @@ For options details see comments in the config file.
 
 ## Acknowledgements
 Thanks to everyone who tested and gave advice.
+
 **Bug reports, suggestions and pull request are welcome!**
