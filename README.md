@@ -6,7 +6,7 @@ Command line tools for photo importing/renaming/rotating
   * Media files moving/copying to configurable hierarchy 
   * Lossless rotations (via exiftran)
 
-# photo-importer-server
+# Photo Importer Server
 Standalone web server for fast media import for headless computer
 ### Features:
   * Mounted storages detection (by path mask)
