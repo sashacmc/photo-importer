@@ -2,11 +2,11 @@
 
 import os
 import re
-import cgi
 import sys
 import glob
 import json
 import psutil
+import urllib
 import logging
 import argparse
 import http.server
@@ -245,7 +245,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
     def __path_params(self):
         path_params = self.path.split('?')
         if len(path_params) > 1:
-            return path_params[0], cgi.parse_qs(path_params[1])
+            return path_params[0], urllib.parse.parse_qs(path_params[1])
         else:
             return path_params[0], {}
 
