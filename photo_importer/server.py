@@ -60,9 +60,13 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             with open('/sys/block/%s/removable' % (dev,)) as f:
                 if f.read(1) != '1':
                     continue
+            read_only = False
+            with open('/sys/block/%s/ro' % (dev,)) as f:
+                if f.read(1) == '1':
+                    read_only = True
             for ppath in glob.glob('/sys/block/%s/%s*' % (dev, dev)):
                 pdev = os.path.split(ppath)[1]
-                res.append(pdev)
+                res.append((pdev, read_only))
         return res
 
     def __mount_get_list(self):
@@ -72,13 +76,17 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
         if self.server.fixed_in_path() != '':
             mount_list['/dev/' + FIXED_IN_PATH_NAME] = \
                 self.server.fixed_in_path()
-            dev_list.append(FIXED_IN_PATH_NAME)
+            dev_list.append((
+                FIXED_IN_PATH_NAME,
+                not os.access(self.server.fixed_in_path(), os.W_OK)))
 
         res = {}
-        for dev in dev_list:
+        for dev, read_only in dev_list:
             r = {}
             r['path'] = mount_list.get('/dev/' + dev, '')
             r['progress'] = 0
+            r['read_only'] = read_only
+            r['allow_start'] = not (read_only and self.server.move_mode())
             if r['path']:
                 stat = self.server.import_status(r['path'])
                 du = psutil.disk_usage(r['path'])
@@ -301,6 +309,7 @@ class PhotoImporterServer(http.server.HTTPServer):
         self.__web_path = cfg['server']['web_path']
         self.__out_path = cfg['server']['out_path']
         self.__fixed_in_path = cfg['server']['in_path']
+        self.__move_mode = int(cfg['main']['move_mode'])
         super().__init__(('', port), PhotoImporterHandler)
 
     def web_path(self):
@@ -311,6 +320,9 @@ class PhotoImporterServer(http.server.HTTPServer):
 
     def fixed_in_path(self):
         return self.__fixed_in_path
+
+    def move_mode(self):
+        return self.__move_mode
 
     def import_start(self, in_path, out_path):
         logging.info('import_start: %s', in_path)
