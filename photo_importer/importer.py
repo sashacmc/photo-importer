@@ -35,7 +35,7 @@ class Importer(threading.Thread):
 
         new_filenames = self.__image_filenames(self.__move_files(filenames))
 
-        if self.__config['main']['remove_empty_dirs']:
+        if int(self.__config['main']['remove_empty_dirs']):
             self.__remove_empty_dirs(dirs)
 
         self.__rotate_files(new_filenames)
