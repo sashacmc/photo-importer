@@ -69,6 +69,15 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
                 res.append((pdev, read_only))
         return res
 
+    def __folder_size(self, path):
+        res = 0
+        for entry in os.scandir(path):
+            if entry.is_file():
+                res += entry.stat().st_size
+            elif entry.is_dir():
+                res += self.__folder_size(entry.path)
+        return res
+
     def __mount_get_list(self):
         mount_list = self.__get_mounted_list()
         dev_list = self.__get_removable_devices()
@@ -90,7 +99,11 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             if r['path']:
                 stat = self.server.import_status(r['path'])
                 du = psutil.disk_usage(r['path'])
-                r['size'] = self.__bytes_to_gbytes(du.total)
+                if dev == FIXED_IN_PATH_NAME:
+                    r['size'] = self.__bytes_to_gbytes(
+                        self.__folder_size(r['path']))
+                else:
+                    r['size'] = self.__bytes_to_gbytes(du.total)
                 r['usage'] = du.percent
                 if stat:
                     stage = stat['stage']

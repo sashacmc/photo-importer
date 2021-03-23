@@ -1,3 +1,9 @@
+photo-importer (1.0.6) stable; urgency=medium
+
+  * Use directory size in place of disc usage for fixed server input path
+
+ -- Alexander Bushnev <Alexander@Bushnev.ru>  Tue, 23 Mar 2021 17:36:11 +0100
+
 photo-importer (1.0.5) stable; urgency=medium
 
   * Fix read of remove_empty_dirs
