@@ -15,12 +15,15 @@
         <div class="table table-striped table-bordered" id="devTable"/>
     </div>
     <div id="storagePath"></div>
+    <br/>
     <div id="sysInfo"></div>
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
     <script type="text/javascript">
+        var g_outpath;
+
         function progress(p, caption, style)
         {            
             return "<div class=\"progress\">"
@@ -160,19 +163,24 @@
             g_outpath = urlParams.get('outpath');
 
             if (g_outpath) {
-                $("#storagePath").html("<p class=\"text-monospace\">Storage: " + g_outpath + "</p>");
+                $("#storagePath").text("Storage: " + g_outpath);
             }
 
             update()
             updateSysInfo()
         }
 
+        function reload()
+        {
+            location.reload(true)
+        }
+
         $(document).ready(function() 
         {
             init();
-            setInterval('update()', 5000);  
-            setInterval('updateSysInfo()', 1000);  
-            setInterval('location.reload(true)', 3600000); //reload page every hour
+            setInterval(update, 5000);  
+            setInterval(updateSysInfo, 1000);  
+            setInterval(reload, 3600000); //reload page every hour
         });
     </script>
 </body>

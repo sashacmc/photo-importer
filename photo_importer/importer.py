@@ -124,7 +124,7 @@ if __name__ == '__main__':
 
     log.initLogger()
 
-    imp = Importer(config.Config(), sys.argv[1], sys.argv[2])
+    imp = Importer(config.Config(), sys.argv[1], sys.argv[2], False)
     imp.start()
     imp.join()
 
