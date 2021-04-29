@@ -266,7 +266,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
                 cont = 'image/png'
             else:
                 cont = 'text/none'
-            with open(fname, 'rb') as f:
+            with open(fname, 'rb') as f:  # lgtm[py/path-injection]
                 self.send_response(200)
                 self.send_header('Content-type', cont)
                 self.end_headers()
