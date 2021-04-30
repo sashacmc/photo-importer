@@ -1,4 +1,9 @@
 # Photo Importer
+
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/sashacmc/photo-importer.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/sashacmc/photo-importer/alerts/)
+[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/sashacmc/photo-importer.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/sashacmc/photo-importer/context:javascript)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/sashacmc/photo-importer.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/sashacmc/photo-importer/context:python)
+
 Command line tools for photo importing/renaming/rotating
 ### Features:
   * Media files scan
