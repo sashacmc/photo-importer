@@ -1,6 +1,6 @@
 from setuptools import setup
 setup(name='photo-importer',
-      version='1.0.0',
+      version='1.0.7',
       description='Photo importer tool',
       author='Alexander Bushnev',
       author_email='Alexander@Bushnev.ru',

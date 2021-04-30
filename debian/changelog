@@ -1,3 +1,10 @@
+photo-importer (1.0.7) stable; urgency=medium
+
+  * Rework server errors processing
+  * Fix security issues 
+
+ -- Alexander Bushnev <Alexander@Bushnev.ru>  Thu, 29 Apr 2021 00:25:08 +0200
+
 photo-importer (1.0.6) stable; urgency=medium
 
   * Use directory size in place of disc usage for fixed server input path
