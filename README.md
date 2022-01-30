@@ -29,8 +29,8 @@ Standalone web server for fast media import for headless computer
   * PyExifTool (pip3 install PyExifTool)
   * python3-progressbar
   * python3-psutil
-  * exiftran
-  * pmount
+  * exiftran or jpegtran
+  * pmount (only for server)
 
 
 ### Installation Options:
