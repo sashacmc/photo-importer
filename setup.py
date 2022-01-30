@@ -1,6 +1,6 @@
 from setuptools import setup
 setup(name='photo-importer',
-      version='1.0.7',
+      version='1.0.8',
       description='Photo importer tool',
       author='Alexander Bushnev',
       author_email='Alexander@Bushnev.ru',
@@ -12,5 +12,6 @@ setup(name='photo-importer',
                    ['photo-importer.service']),
                   ('share/photo-importer/web/',
                    ['web/index.html', 'web/log.png'])],
+      install_requires=['PyExifTool', 'progressbar', 'psutil'],
       scripts=['photo-importer', 'photo-importer-server'],
       zip_safe=False)
