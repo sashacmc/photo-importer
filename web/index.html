@@ -48,15 +48,18 @@
             for (var dev in data) {
                 var action = ""
                 var state = data[dev].state
-                if (dev == "none") {
+                var name = dev
+                var path = encodeURIComponent(data[dev].path)
+                if (dev.startsWith("none")) {
+                    name = ""
                     if (state == "mounted" || state == "done") {
-                        action += "<input onclick=\"sendCommand('start', '" + data[dev].path + "');\" type=button class=\"btn btn-success btn-sm\" value=\"Import\"/> ";
+                        action += "<input onclick=\"sendCommand('start', '" + path + "');\" type=button class=\"btn btn-success btn-sm\" value=\"Import\"/> ";
                     }
                 } else {
                     if (state == "mounted") {
                         action += "<input onclick=\"sendCommand('umount', '" + dev + "');\" type=button class=\"btn btn-primary btn-sm\" value=\"Unmount\"/> ";
                         if (data[dev].allow_start) {
-                            action += "<input onclick=\"sendCommand('start', '" + data[dev].path + "');\" type=button class=\"btn btn-success btn-sm\" value=\"Import\"/> ";
+                            action += "<input onclick=\"sendCommand('start', '" + path + "');\" type=button class=\"btn btn-success btn-sm\" value=\"Import\"/> ";
                         }
                     } else if (state == "unmounted") {
                         action = "<input onclick=\"sendCommand('mount', '" + dev + "');\" type=button class=\"btn btn-primary btn-sm\" value=\"Mount\"/> ";
@@ -74,7 +77,6 @@
                 } else if (state == "error") {
                     stat += "<br/><font size=\"-2\">(" + data[dev].details + ")<font>"
                 }
-                var name = dev
                 if (data[dev].read_only) {
                     name += "<br/><font size=\"-2\">(read only)<font>"
                 }
@@ -85,7 +87,7 @@
                      + "<td>" + action + "</td>"
                      + "<td>" + data[dev].size + "&nbsp;GB</td>"
                      + "<td>" + progress(data[dev].usage, "", "bg-info") + "</td>"
-                     + "<td><a href=\"import?a=getlog&p=" + data[dev].path + "\"><img src=\"log.png\"/></a></td>"
+                     + "<td><a href=\"import?a=getlog&p=" + path + "\"><img src=\"log.png\"/></a></td>"
                      + "</tr>"
             }
             html += "</table>"

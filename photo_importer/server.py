@@ -55,7 +55,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
     def __bytes_to_gbytes(self, b):
         return round(b / 1024. / 1024. / 1024., 2)
 
-    def __get_removable_devices(self):
+    def __get_removable_devices_posix(self):
         mount_list = self.__get_mounted_list()
         res = {}
         for path in glob.glob('/sys/block/*/device'):
@@ -81,6 +81,33 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
                         'mount_path': '',
                         'read_only': read_only
                     }
+
+        return res
+
+    def __get_removable_devices_win(self):
+        import win32api
+        import win32con
+        import win32file
+
+        res = {}
+        for d in win32api.GetLogicalDriveStrings().split('\x00'):
+            if d and win32file.GetDriveType(d) == win32con.DRIVE_REMOVABLE:
+                dev_name = FIXED_IN_PATH_NAME + d
+                res[dev_name] = {
+                    'dev_path': dev_name,
+                    'mount_path': d,
+                    'read_only': not os.access(d, os.W_OK)
+                }
+        return res
+
+    def __get_removable_devices(self):
+        res = {}
+        if os.name == 'nt':
+            res = self.__get_removable_devices_win()
+        elif os.name == 'posix':
+            res = self.__get_removable_devices_posix()
+        else:
+            raise Exception('Unsupported os: %s' % os.name)
 
         if self.server.fixed_in_path() != '':
             res[FIXED_IN_PATH_NAME] = {
@@ -214,7 +241,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
 
         try:
             out_path = params['o'][0]
-        except Exception as ex:
+        except Exception:
             out_path = self.server.out_path()
 
         result = None
@@ -235,7 +262,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
     def __sysinfo_request(self, params):
         try:
             path = params['p'][0]
-        except Exception as ex:
+        except Exception:
             path = self.server.out_path()
         res = {}
         du = psutil.disk_usage(path)
@@ -338,7 +365,7 @@ class PhotoImporterServer(http.server.HTTPServer):
         self.__cfg = cfg
         self.__importers = {}
         port = int(cfg['server']['port'])
-        self.__web_path = cfg['server']['web_path']
+        self.__web_path = os.path.normpath(cfg['server']['web_path'])
         self.__out_path = cfg['server']['out_path']
         self.__fixed_in_path = cfg['server']['in_path']
         self.__move_mode = int(cfg['main']['move_mode'])
@@ -358,8 +385,6 @@ class PhotoImporterServer(http.server.HTTPServer):
 
     def import_start(self, in_path, out_path):
         logging.info('import_start: %s', in_path)
-        if in_path in self.__importers and in_path != self.fixed_in_path():
-            raise Exception('Already started')
 
         self.__importers[in_path] = importer.Importer(
             self.__cfg,
