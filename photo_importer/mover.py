@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import os
+import shutil
 import logging
 import subprocess
 
@@ -23,6 +24,7 @@ class Mover(object):
         self.__move_mode = int(config['main']['move_mode'])
         self.__remove_garbage = int(config['main']['remove_garbage'])
         self.__umask = int(config['main']['umask'], 8)
+        self.__use_shutil = int(config['main']['use_shutil'])
         self.__stat = {'total': len(filenames)}
         self.__file_prop = fileprop.FileProp(self.__config)
 
@@ -79,15 +81,11 @@ class Mover(object):
 
             fullname = prop.out_name_full(path)
             if self.__move_mode:
-                if not self.__run(["mv", fname, fullname]):
-                    self.__stat['errors'] += 1
-                    return None
+                self.__move(fname, fullname)
                 logging.info('"%s" moved "%s"' % (fname, fullname))
                 self.__stat['moved'] += 1
             else:
-                if not self.__run(["cp", "-a", fname, fullname]):
-                    self.__stat['errors'] += 1
-                    return None
+                self.__copy(fname, fullname)
                 logging.info('"%s" copied "%s"' % (fname, fullname))
                 self.__stat['copied'] += 1
 
@@ -103,6 +101,20 @@ class Mover(object):
                 logging.info('"%s" renamed "%s"' % (fname, new_fname))
                 self.__stat['moved'] += 1
                 return new_fname
+
+    def __move(self, src, dst):
+        if self.__use_shutil:
+            shutil.move(src, dst)
+        else:
+            if not self.__run(["mv", src, dst]):
+                raise SystemError('mv "%s" "%s" failed' % (src, dst))
+
+    def __copy(self, src, dst):
+        if self.__use_shutil:
+            shutil.copy2(src, dst)
+        else:
+            if not self.__run(["cp", "-a", src, dst]):
+                raise SystemError('mv "%s" "%s" failed' % (src, dst))
 
     def __run(self, args):
         if self.__dryrun:
