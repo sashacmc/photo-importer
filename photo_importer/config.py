@@ -26,6 +26,7 @@ class Config(object):
             'move_mode': 1,
             'threads_count': 2,
             'umask': '0o000',
+            'use_jpegtran': 0,
         },
         'server': {
             'port': 8080,
