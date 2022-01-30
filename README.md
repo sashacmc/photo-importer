@@ -31,6 +31,7 @@ Standalone web server for fast media import for headless computer
   * python3-psutil
   * exiftran or jpegtran
   * pmount (only for server)
+  * pypiwin32 (only for windows)
 
 
 ### Installation Options:
@@ -43,6 +44,21 @@ sudo dpkg -i ../photo-importer_1.0.1_all.deb
 #### Installing via setup.py
 ```bash
 sudo python3 ./setup.py install
+```
+
+#### Installing for Windows
+Download and install python3 for you Windows distributive
+https://www.python.org/downloads/windows/
+
+Download and install exiftool
+https://exiftool.org/
+
+Download and extract jpegtran to photo_importer folder
+http://sylvana.net/jpegcrop/jpegtran/
+
+Install python dependencies
+```bash
+python -m pip install progressbar psutil pyexiftool pypiwin32
 ```
 
 ## Usage
@@ -69,6 +85,16 @@ Will import (by default move, but it can be changed in config) files from /path/
   * click "Unmount"
 
 ![Web interface example](https://user-images.githubusercontent.com/28735879/76140174-f1995300-6057-11ea-8718-19c38650c786.png)
+
+### Windows command line
+```bash
+cd photo_importer
+run.py -c ..\photo-importer-win.cfg path\to\media\files \output\path
+```
+### Windows web 
+```bash
+photo-importer-server.bat
+```
 
 ## Configuration
 The server config file located in /etc/photo-importer.cfg
