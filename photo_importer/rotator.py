@@ -134,7 +134,6 @@ class Rotator(object):
             return True
         except Exception as ex:
             logging.error('Rotator exception (%s): %s' % (filename, ex))
-            raise
             return False
 
     def __get_orientation_cmd(self, fullname):
