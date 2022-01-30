@@ -17,7 +17,7 @@ class Config(object):
             'time_src_video': 'exif,name,attr',
             'time_src_audio': 'exif,name,attr',
             'file_ext_image': 'jpeg,jpg',
-            'file_ext_video': 'mp4,mpg,mpeg,mov,avi,mts,m2ts,3gp',
+            'file_ext_video': 'mp4,mpg,mpeg,mov,avi,mts,m2ts,3gp,m4v',
             'file_ext_audio': 'mp3,3gpp,m4a,wav',
             'file_ext_garbage': 'thm,ctg',
             'file_ext_ignore': 'ini,zip,db',
@@ -27,6 +27,7 @@ class Config(object):
             'threads_count': 2,
             'umask': '0o000',
             'use_jpegtran': 0,
+            'use_shutil': 0,
         },
         'server': {
             'port': 8080,

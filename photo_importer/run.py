@@ -58,7 +58,8 @@ class ProgressBar(threading.Thread):
                         self.__pbar.finish()
                     break
 
-            if stage == 'move' or stage == 'rotate':
+            if (stage == 'move' or stage == 'rotate') and \
+                    self.__pbar is not None:
                 self.__pbar.update(stat[stage]['processed'])
 
 
