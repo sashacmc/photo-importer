@@ -1,53 +1,59 @@
+photo-importer (1.1.1) stable; urgency=medium
+
+  * Add date/time patterns in out subdirs support 
+
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Fri, 13 May 2022 01:15:38 +0200
+
 photo-importer (1.1.0) stable; urgency=medium
 
   * Add Windows support
 
- -- Alexander Bushnev <Alexander@Bushnev.ru>  Mon, 31 Jan 2022 00:10:46 +0100
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Mon, 31 Jan 2022 00:10:46 +0100
 
 photo-importer (1.0.9) stable; urgency=medium
 
   * Add windows compatibility by means of use_shutil option
 
- -- Alexander Bushnev <Alexander@Bushnev.ru>  Sun, 30 Jan 2022 12:20:53 +0100
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Sun, 30 Jan 2022 12:20:53 +0100
 
 photo-importer (1.0.8) stable; urgency=medium
 
   * Add jpegtran support 
 
- -- Alexander Bushnev <Alexander@Bushnev.ru>  Sun, 30 Jan 2022 02:25:01 +0100
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Sun, 30 Jan 2022 02:25:01 +0100
 
 photo-importer (1.0.7) stable; urgency=medium
 
   * Rework server errors processing
   * Fix security issues 
 
- -- Alexander Bushnev <Alexander@Bushnev.ru>  Thu, 29 Apr 2021 00:25:08 +0200
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Thu, 29 Apr 2021 00:25:08 +0200
 
 photo-importer (1.0.6) stable; urgency=medium
 
   * Use directory size in place of disc usage for fixed server input path
 
- -- Alexander Bushnev <Alexander@Bushnev.ru>  Tue, 23 Mar 2021 17:36:11 +0100
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Tue, 23 Mar 2021 17:36:11 +0100
 
 photo-importer (1.0.5) stable; urgency=medium
 
   * Fix read of remove_empty_dirs
   * Change deprecated parse_qs call
 
- -- Alexander Bushnev <Alexander@Bushnev.ru>  Mon, 08 Mar 2021 00:46:55 +0100
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Mon, 08 Mar 2021 00:46:55 +0100
 
 photo-importer (1.0.4) stable; urgency=medium
 
   * Check device readonly and don't allow import with move mode
 
- -- Alexander Bushnev <Alexander@Bushnev.ru>  Sun, 07 Mar 2021 21:04:36 +0100
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Sun, 07 Mar 2021 21:04:36 +0100
 
 photo-importer (1.0.3) stable; urgency=medium
 
   * Use system mv and cp in place of python commands
   * Add errors check in console script
 
- -- Alexander Bushnev <Alexander@Bushnev.ru>  Sun, 27 Dec 2020 12:39:03 +0100
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Sun, 27 Dec 2020 12:39:03 +0100
 
 photo-importer (1.0.2) stable; urgency=medium
 
@@ -56,16 +62,16 @@ photo-importer (1.0.2) stable; urgency=medium
   * Improve audio time detection
   * Add umask option
 
- -- Alexander Bushnev <Alexander@Bushnev.ru>  Fri, 29 May 2020 15:00:58 +0200
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Fri, 29 May 2020 15:00:58 +0200
 
 photo-importer (1.0.1) stable; urgency=medium
 
   * Add outpath web interface option
 
- -- Alexander Bushnev <Alexander@Bushnev.ru>  Fri, 17 Jan 2020 12:29:53 +0100
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Fri, 17 Jan 2020 12:29:53 +0100
 
 photo-importer (1.0.0) stable; urgency=medium
 
   * Initial release.
 
- -- Alexander Bushnev <Alexander@Bushnev.ru>  Wed, 27 Nov 2019 20:35:07 +0100
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Wed, 27 Nov 2019 20:35:07 +0100
