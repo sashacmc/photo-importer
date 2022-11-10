@@ -1,9 +1,9 @@
 from setuptools import setup
 setup(name='photo-importer',
-      version='1.1.0',
+      version='1.1.1',
       description='Photo importer tool',
       author='Alexander Bushnev',
-      author_email='Alexander@Bushnev.ru',
+      author_email='Alexander@Bushnev.pro',
       license='GNU General Public License v3.0',
       packages=['photo_importer'],
       data_files=[('/etc/',

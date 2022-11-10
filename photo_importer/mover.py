@@ -67,13 +67,12 @@ class Mover(object):
             return None
 
         if self.__output_path:
-            type_subdir = \
-                self.__config['main'][self.OUT_SUBDIR_CFG[prop.type()]]
+            path = prop.time().strftime(
+                os.path.join(
+                    self.__output_path,
+                    self.__config['main'][self.OUT_SUBDIR_CFG[prop.type()]],
+                    self.__config['main']['out_date_format']))
 
-            date_subdir = prop.time().strftime(
-                self.__config['main']['out_date_format'])
-
-            path = os.path.join(self.__output_path, type_subdir, date_subdir)
             if not os.path.isdir(path):
                 if not self.__dryrun:
                     os.makedirs(path)
