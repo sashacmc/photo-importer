@@ -29,9 +29,10 @@ def initLogger(filename=None, level=logging.INFO):
 
     fmt = logging.Formatter(LOGFMT, DATEFMT)
     fh.setFormatter(fmt)
+    fh.setLevel(level)
     logging.getLogger().addHandler(fh)
 
-    logging.getLogger().setLevel(level)
+    logging.getLogger().setLevel(logging.DEBUG)
 
     logging.info('Log file: ' + str(filename))
     logging.debug(str(sys.argv))
@@ -44,6 +45,7 @@ class MemLogger(object):
         self.__stream = io.StringIO()
         self.__handler = logging.StreamHandler(self.__stream)
         self.__handler.setFormatter(fmt)
+        self.__handler.setLevel(logging.INFO)
         logging.getLogger().addHandler(self.__handler)
         logging.info("MemLogger " + self.__name + " started")
 
