@@ -21,9 +21,14 @@ parts/
 sdist/
 var/
 wheels/
+debian/photo-importer/
+debian/files
+.pybuild
 *.egg-info/
 .installed.cfg
 *.egg
+*.debhelper
+*.substvars
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

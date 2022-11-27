@@ -1,3 +1,9 @@
+photo-importer (1.1.2) stable; urgency=medium
+
+  * Update setup scripts 
+
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Mon, 28 Nov 2022 00:21:13 +0100
+
 photo-importer (1.1.1) stable; urgency=medium
 
   * Add date/time patterns in out subdirs support 
