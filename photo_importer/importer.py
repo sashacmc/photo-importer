@@ -28,8 +28,9 @@ class Importer(threading.Thread):
 
     def run(self):
         logging.info(
-            'Start: %s -> %s (dryrun: %s)' %
-            (self.__input_path, self.__output_path, self.__dryrun))
+            'Start: %s -> %s (dryrun: %s)'
+            % (self.__input_path, self.__output_path, self.__dryrun)
+        )
 
         filenames, dirs = self.__scan_files(self.__input_path)
 
@@ -48,7 +49,8 @@ class Importer(threading.Thread):
         res_dir = []
         res = []
         for root, dirs, files in os.walk(
-                input_path, onerror=self.__on_walk_error):
+            input_path, onerror=self.__on_walk_error
+        ):
 
             for fname in files:
                 res.append(os.path.join(root, fname))
@@ -72,7 +74,8 @@ class Importer(threading.Thread):
             self.__input_path,
             self.__output_path,
             filenames,
-            self.__dryrun)
+            self.__dryrun,
+        )
         self.__stat['stage'] = 'move'
 
         res = self.__mov.run()
@@ -88,10 +91,7 @@ class Importer(threading.Thread):
 
     def __rotate_files(self, filenames):
         logging.info('Rotating')
-        self.__rot = rotator.Rotator(
-            self.__config,
-            filenames,
-            self.__dryrun)
+        self.__rot = rotator.Rotator(self.__config, filenames, self.__dryrun)
         self.__stat['stage'] = 'rotate'
 
         self.__rot.run()

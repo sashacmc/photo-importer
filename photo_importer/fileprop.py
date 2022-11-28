@@ -18,16 +18,26 @@ GARBAGE = 4
 
 class FileProp(object):
     DATE_REX = [
-        (re.compile('\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}'),
-            '%Y-%m-%d_%H-%M-%S'),
-        (re.compile('\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}'),
-            '%Y-%m-%d-%H-%M-%S'),
-        (re.compile('\d{4}-\d{2}-\d{2}T\d{2}.\d{2}.\d{2}'),
-            '%Y-%m-%dT%H.%M.%S'),
-        (re.compile('\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}'),
-            '%Y-%m-%dT%H:%M:%S'),
-        (re.compile('\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2}'),
-            '%Y_%m_%d_%H_%M_%S'),
+        (
+            re.compile('\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}'),
+            '%Y-%m-%d_%H-%M-%S',
+        ),
+        (
+            re.compile('\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}'),
+            '%Y-%m-%d-%H-%M-%S',
+        ),
+        (
+            re.compile('\d{4}-\d{2}-\d{2}T\d{2}.\d{2}.\d{2}'),
+            '%Y-%m-%dT%H.%M.%S',
+        ),
+        (
+            re.compile('\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}'),
+            '%Y-%m-%dT%H:%M:%S',
+        ),
+        (
+            re.compile('\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2}'),
+            '%Y_%m_%d_%H_%M_%S',
+        ),
         (re.compile('\d{8}_\d{6}'), '%Y%m%d_%H%M%S'),
         (re.compile('\d{14}'), '%Y%m%d%H%M%S'),
         (re.compile('\d{8}'), '%Y%m%d'),
@@ -125,8 +135,10 @@ class FileProp(object):
                         md = md[0:pos]
                     return datetime.datetime.strptime(md, '%Y:%m:%d %H:%M:%S')
 
-            logging.warning('time by exif (%s) not found tags count: %s' %
-                            (fullname, len(metadata)))
+            logging.warning(
+                'time by exif (%s) not found tags count: %s'
+                % (fullname, len(metadata))
+            )
             for tag, val in metadata.items():
                 logging.debug('%s: %s' % (tag, val))
             return None
@@ -136,7 +148,8 @@ class FileProp(object):
     def __time_by_attr(self, fullname):
         try:
             return datetime.datetime.fromtimestamp(
-                time.mktime(time.localtime(os.stat(fullname)[stat.ST_MTIME])))
+                time.mktime(time.localtime(os.stat(fullname)[stat.ST_MTIME]))
+            )
         except (FileNotFoundError, KeyError) as ex:
             logging.warning('time by attr (%s) exception: %s' % (fullname, ex))
 
@@ -161,13 +174,12 @@ class FileProp(object):
         ftime = self.__time(fullname, fname, tp)
 
         if ftime:
-            out_name = ftime.strftime(
-                self.__config['main']['out_time_format'])
+            out_name = ftime.strftime(self.__config['main']['out_time_format'])
         else:
             out_name = None
 
         if out_name:
-            ok = fname[0:len(out_name)] == out_name
+            ok = fname[0 : len(out_name)] == out_name
         else:
             ok = False
 
@@ -206,12 +218,12 @@ class FilePropRes(object):
         if path is None:
             path = self.__path
 
-        return self.__prop_ptr._out_name_full(
-            path, self.__out_name, self.__ext)
+        return self.__prop_ptr._out_name_full(path, self.__out_name, self.__ext)
 
 
 if __name__ == '__main__':
     import sys
+
     sys.path.insert(0, os.path.abspath('..'))
 
     from photo_importer import log

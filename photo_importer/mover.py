@@ -71,7 +71,9 @@ class Mover(object):
                 os.path.join(
                     self.__output_path,
                     self.__config['main'][self.OUT_SUBDIR_CFG[prop.type()]],
-                    self.__config['main']['out_date_format']))
+                    self.__config['main']['out_date_format'],
+                )
+            )
 
             if not os.path.isdir(path):
                 if not self.__dryrun:
@@ -120,9 +122,8 @@ class Mover(object):
             return True
 
         with subprocess.Popen(
-                args,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE) as proc:
+            args, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        ) as proc:
             proc.wait()
             info = proc.stdout.read().strip()
             if info:
@@ -131,8 +132,9 @@ class Mover(object):
             if err:
                 logging.error(err.decode("utf-8"))
             elif proc.returncode != 0:
-                logging.error('%s failed with code %i' %
-                              (args[0], proc.returncode))
+                logging.error(
+                    '%s failed with code %i' % (args[0], proc.returncode)
+                )
             return proc.returncode == 0
 
     def status(self):

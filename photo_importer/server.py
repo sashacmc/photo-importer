@@ -32,7 +32,6 @@ class HTTPError(Exception):
 
 
 class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
-
     def __ok_response(self, result):
         self.send_response(200)
         self.send_header('Content-type', 'application/json')
@@ -49,11 +48,13 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
         self.send_error(code, explain=str(err))
 
     def __get_mounted_list(self):
-        return {os.path.basename(dp.device): (dp.device, dp.mountpoint)
-                for dp in psutil.disk_partitions()}
+        return {
+            os.path.basename(dp.device): (dp.device, dp.mountpoint)
+            for dp in psutil.disk_partitions()
+        }
 
     def __bytes_to_gbytes(self, b):
-        return round(b / 1024. / 1024. / 1024., 2)
+        return round(b / 1024.0 / 1024.0 / 1024.0, 2)
 
     def __get_removable_devices_posix(self):
         mount_list = self.__get_mounted_list()
@@ -73,13 +74,13 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
                     res[pdev] = {
                         'dev_path': mount_list[pdev][0],
                         'mount_path': mount_list[pdev][1],
-                        'read_only': read_only
+                        'read_only': read_only,
                     }
                 else:
                     res[pdev] = {
                         'dev_path': '/dev/' + pdev,
                         'mount_path': '',
-                        'read_only': read_only
+                        'read_only': read_only,
                     }
 
         return res
@@ -96,7 +97,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
                 res[dev_name] = {
                     'dev_path': dev_name,
                     'mount_path': d,
-                    'read_only': not os.access(d, os.W_OK)
+                    'read_only': not os.access(d, os.W_OK),
                 }
         return res
 
@@ -113,8 +114,9 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             res[FIXED_IN_PATH_NAME] = {
                 'dev_path': FIXED_IN_PATH_NAME,
                 'mount_path': self.server.fixed_in_path(),
-                'read_only':
-                    not os.access(self.server.fixed_in_path(), os.W_OK)
+                'read_only': not os.access(
+                    self.server.fixed_in_path(), os.W_OK
+                ),
             }
 
         return res
@@ -138,13 +140,15 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             r['progress'] = 0
             r['read_only'] = info['read_only']
             r['allow_start'] = not (
-                info['read_only'] and self.server.move_mode())
+                info['read_only'] and self.server.move_mode()
+            )
             if r['path']:
                 stat = self.server.import_status(r['path'])
                 du = psutil.disk_usage(r['path'])
                 if dev == FIXED_IN_PATH_NAME:
                     r['size'] = self.__bytes_to_gbytes(
-                        self.__folder_size(r['path']))
+                        self.__folder_size(r['path'])
+                    )
                 else:
                     r['size'] = self.__bytes_to_gbytes(du.total)
                 r['usage'] = du.percent
@@ -152,12 +156,11 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
                     stage = stat['stage']
                     r['state'] = stage
                     if stage == 'move' or stage == 'rotate':
-                        r['progress'] = \
-                            round(100. *
-                                  stat[stage]['processed'] / stat['total'])
+                        r['progress'] = round(
+                            100.0 * stat[stage]['processed'] / stat['total']
+                        )
                     elif stage == 'done':
-                        cerr = stat['move']['errors'] + \
-                            stat['rotate']['errors']
+                        cerr = stat['move']['errors'] + stat['rotate']['errors']
                         if cerr != 0:
                             r['state'] = 'error'
                             r['total'] = cerr
@@ -178,8 +181,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             raise HTTPError(HTTPStatus.BAD_REQUEST, 'empty "d" param')
         dev_list = self.__get_removable_devices()
         if dev not in dev_list:
-            raise HTTPError(HTTPStatus.BAD_REQUEST,
-                            'wrong device: %s' % dev)
+            raise HTTPError(HTTPStatus.BAD_REQUEST, 'wrong device: %s' % dev)
         device = dev_list[dev]
         if device['mount_path']:
             self.server.import_done(device['mount_path'])
@@ -216,8 +218,9 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
         elif action == 'umount':
             result = self.__mount_umount(dev)
         else:
-            raise HTTPError(HTTPStatus.BAD_REQUEST,
-                            'unknown action %s' % action)
+            raise HTTPError(
+                HTTPStatus.BAD_REQUEST, 'unknown action %s' % action
+            )
 
         self.__ok_response(result)
 
@@ -256,8 +259,9 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             result = self.__import_get_log(in_path)
             self.__text_response(result)
         else:
-            raise HTTPError(HTTPStatus.BAD_REQUEST,
-                            'unknown action %s' % action)
+            raise HTTPError(
+                HTTPStatus.BAD_REQUEST, 'unknown action %s' % action
+            )
 
     def __sysinfo_request(self, params):
         try:
@@ -278,8 +282,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
         try:
             if (path[0]) == '/':
                 path = path[1:]
-            fname = os.path.normpath(
-                os.path.join(self.server.web_path(), path))
+            fname = os.path.normpath(os.path.join(self.server.web_path(), path))
             if not fname.startswith(self.server.web_path()):
                 logging.warning('incorrect path: ' + path)
                 raise HTTPError(HTTPStatus.NOT_FOUND, path)
@@ -387,10 +390,8 @@ class PhotoImporterServer(http.server.HTTPServer):
         logging.info('import_start: %s', in_path)
 
         self.__importers[in_path] = importer.Importer(
-            self.__cfg,
-            in_path,
-            out_path,
-            False)
+            self.__cfg, in_path, out_path, False
+        )
 
         self.__importers[in_path].start()
 

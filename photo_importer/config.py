@@ -35,7 +35,7 @@ class Config(object):
             'out_path': '/mnt/multimedia/NEW/',
             'in_path': '',
             'log_file': 'photo-importer-server.log',
-        }
+        },
     }
 
     def __init__(self, filename=None, create=False):
@@ -44,7 +44,11 @@ class Config(object):
 
         self.__config = configparser.ConfigParser()
         self.__config.read_dict(self.DEFAULTS)
-        self.__config.read([filename, ])
+        self.__config.read(
+            [
+                filename,
+            ]
+        )
 
         if create:
             self.__create_if_not_exists()
