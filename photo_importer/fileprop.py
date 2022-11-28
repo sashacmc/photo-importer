@@ -55,14 +55,14 @@ class FileProp(object):
         'QuickTime:MediaCreateDate',
         'PDF:CreateDate',
         'XMP:CreateDate',
+        'EXIF:CreateDate',
     ]
 
     def __init__(self, config):
         self.__config = config
         self.__prepare_ext_to_type()
         self.__out_list = set()
-        self.__exiftool = exiftool.ExifTool()
-        self.__exiftool.start()
+        self.__exiftool = exiftool.ExifToolHelper()
 
     def __prepare_ext_to_type(self):
         self.EXT_TO_TYPE = {}
@@ -116,7 +116,7 @@ class FileProp(object):
 
     def __time_by_exif(self, fullname):
         try:
-            metadata = self.__exiftool.get_metadata(fullname)
+            metadata = self.__exiftool.get_metadata(fullname)[0]
             for tag in self.DATE_TAGS:
                 if tag in metadata:
                     md = metadata[tag]
