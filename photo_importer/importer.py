@@ -1,17 +1,14 @@
 #!/usr/bin/python3
 
 import os
-import sys
 import logging
 import threading
 
-sys.path.insert(0, os.path.abspath('..'))
-
-from photo_importer import log  # noqa
-from photo_importer import mover  # noqa
-from photo_importer import config  # noqa
-from photo_importer import rotator  # noqa
-from photo_importer import fileprop  # noqa
+from . import log
+from . import mover
+from . import config
+from . import rotator
+from . import fileprop
 
 
 class Importer(threading.Thread):
