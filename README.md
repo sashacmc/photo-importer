@@ -9,7 +9,7 @@ Command line tools for photo importing/renaming/rotating
   * Media files scan
   * Time when picture was taken detection (by EXIF, by file name, by file attributes)
   * Media files moving/copying to configurable hierarchy 
-  * Lossless rotations (via exiftran)
+  * Lossless rotations (via exiftran or jpegtran)
 
 # Photo Importer Server
 Standalone web server for fast media import for headless computer
@@ -18,31 +18,38 @@ Standalone web server for fast media import for headless computer
   * Storages mount/unmount (via pmount)
   * The same as photo-importer but without console
 
-## Installation
+# Installation
 
 ### Requirements:
 
   * Python 3.3+
-  * Debian based Linux (Other Linux versions not officially supported, but might work)
+  * Debian based Linux (Other Linux versions not officially supported, but might work) or Windows 7 and above
 
 ### Dependencies:
-  * PyExifTool (pip3 install PyExifTool)
-  * python3-progressbar
-  * python3-psutil
-  * exiftran or jpegtran
-  * pmount (only for server)
-  * pypiwin32 (only for windows)
+  * [PyExifTool](https://pypi.org/project/PyExifTool/)
+  * [progressbar](https://pypi.org/project/progressbar/)
+  * [psutil](https://pypi.org/project/psutil/)
+  * [exiftran](https://linux.die.net/man/1/exiftran) or [jpegtran](https://linux.die.net/man/1/jpegtran)
+  * [pmount](https://linux.die.net/man/1/pmount) (only for server)
+  * [pypiwin32](https://pypi.org/project/pypiwin32/) (only for windows)
 
 
 ### Installation Options:
 
+#### Installing via PyPi
+```bash
+sudo apt install exiftran pmount
+sudo pip install photo-importer
+```
 #### Installing as debian package
 ```bash
 debuild -b
-sudo dpkg -i ../photo-importer_1.0.1_all.deb
+sudo dpkg -i ../photo-importer_1.2.0_all.deb
 ```
 #### Installing via setup.py
 ```bash
+sudo pip install PyExifTool progressbar psutil
+sudo apt install exiftran pmount
 sudo python3 ./setup.py install
 ```
 
@@ -56,9 +63,9 @@ https://exiftool.org/
 Download and extract jpegtran to photo_importer folder
 http://sylvana.net/jpegcrop/jpegtran/
 
-Install python dependencies
+Install with python dependencies
 ```bash
-python -m pip install progressbar psutil pyexiftool pypiwin32
+python -m pip install pypiwin32 photo-importer
 ```
 
 ## Usage
