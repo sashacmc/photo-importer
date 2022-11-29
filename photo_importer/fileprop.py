@@ -17,7 +17,7 @@ GARBAGE = 4
 
 
 class FileProp(object):
-    DATE_REX = [
+    DATE_REGEX = [
         (
             re.compile('\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}'),
             '%Y-%m-%d_%H-%M-%S',
@@ -74,6 +74,9 @@ class FileProp(object):
         self.__out_list = set()
         self.__exiftool = exiftool.ExifToolHelper()
 
+    def __del__(self):
+        self.__exiftool.terminate()
+
     def __prepare_ext_to_type(self):
         self.EXT_TO_TYPE = {}
         for tp, cfg in self.FILE_EXT_CFG.items():
@@ -111,7 +114,7 @@ class FileProp(object):
         return None
 
     def __time_by_name(self, fname):
-        for exp, fs in self.DATE_REX:
+        for exp, fs in self.DATE_REGEX:
             mat = exp.findall(fname)
             if len(mat):
                 try:

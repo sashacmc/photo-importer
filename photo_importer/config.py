@@ -63,6 +63,9 @@ class Config(object):
     def __getitem__(self, sect):
         return self.__config[sect]
 
+    def set(self, sect, name, val):
+        self.__config[sect][name] = val
+
 
 if __name__ == "__main__":
     Config(create=True)
