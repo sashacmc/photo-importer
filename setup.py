@@ -32,6 +32,7 @@ setup(
         'Development Status :: 5 - Production/Stable',
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX :: Linux',
+        'Operating System :: MacOS',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
@@ -40,6 +41,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)'
         'Topic :: Scientific/Engineering :: Image Processing',
         'Topic :: Multimedia :: Video',
         'Topic :: Utilities',

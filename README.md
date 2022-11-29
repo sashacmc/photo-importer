@@ -23,7 +23,12 @@ Standalone web server for fast media import for headless computer
 ### Requirements:
 
   * Python 3.3+
-  * Debian based Linux (Other Linux versions not officially supported, but might work) or Windows 7 and above
+
+### Supported OS:
+
+  * Debian based Linux (other Linux versions not officially supported, but might work)
+  * Windows 7 and above
+  * MacOS X and above (with brew installed, only console version)
 
 ### Dependencies:
   * [PyExifTool](https://pypi.org/project/PyExifTool/)
