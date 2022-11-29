@@ -1,9 +1,13 @@
 photo-importer (1.2.0) stable; urgency=medium
 
+  * Add PyPi install support
   * Update to new PyExifTool
   * Reformat with black
   * Update modules import
-  * Add PyPi install support
+  * Add importer test
+  * Improve fileprop tests
+  * Remove legacy modules __main__
+  * MacOS support verified 
 
  -- Alexander Bushnev <Alexander@Bushnev.pro>  Tue, 29 Nov 2022 09:03:24 +0100
 
