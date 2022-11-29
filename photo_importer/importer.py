@@ -114,15 +114,3 @@ class Importer(threading.Thread):
 
     def log_text(self):
         return self.__log.get_text()
-
-
-if __name__ == '__main__':
-    import sys
-
-    log.initLogger()
-
-    imp = Importer(config.Config(), sys.argv[1], sys.argv[2], False)
-    imp.start()
-    imp.join()
-
-    print(imp.status())

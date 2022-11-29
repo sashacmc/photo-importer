@@ -163,12 +163,3 @@ class Rotator(object):
             'good': self.__good,
             'errors': self.__errors,
         }
-
-
-if __name__ == '__main__':
-    import sys
-
-    rot = Rotator(config.Config(), sys.argv[1:], False)
-    rot.run()
-
-    print(rot.status())

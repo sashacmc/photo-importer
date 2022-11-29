@@ -146,7 +146,3 @@ class TestFileProp(unittest.TestCase):
         self.assertEqual(fp.type(), fileprop.GARBAGE)
         self.assertEqual(fp.time(), None)
         self.assertEqual(fp.ok(), False)
-
-
-if __name__ == '__main__':
-    unittest.main()
