@@ -7,7 +7,6 @@ import tempfile
 import subprocess
 import concurrent.futures
 
-from photo_importer import config
 
 JPEGTRAN_COMMAND = {
     0: None,
@@ -18,7 +17,7 @@ JPEGTRAN_COMMAND = {
     5: '-transpose',
     6: '-rotate 90',
     7: '-transverse',
-    8: '-rotate 270'
+    8: '-rotate 270',
 }
 
 ORIENTATION_TAG = 'EXIF:Orientation'
@@ -39,16 +38,15 @@ class Rotator(object):
         processor = self.__process_exiftran
         self.__exiftool = None
         if int(self.__config['main']['use_jpegtran']):
-            self.__exiftool = exiftool.ExifTool()
-            self.__exiftool.start()
+            self.__exiftool = exiftool.ExifToolHelper()
             processor = self.__process_jpegtran
             tc = 1
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=tc) as executor:
 
             futures = {
-                executor.submit(processor, fn):
-                fn for fn in self.__filenames}
+                executor.submit(processor, fn): fn for fn in self.__filenames
+            }
 
             for future in concurrent.futures.as_completed(futures):
                 self.__processed += 1
@@ -69,24 +67,24 @@ class Rotator(object):
             if self.__dryrun:
                 return True
 
-            p = subprocess.Popen(
+            error = ''
+            with subprocess.Popen(
                 cmd,
                 shell=True,
                 universal_newlines=True,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE).stderr
+                stderr=subprocess.PIPE,
+            ) as p:
+                while True:
+                    line = p.stderr.readline()
+                    if not line:
+                        break
 
-            error = ''
-            while True:
-                line = p.readline()
-                if not line:
-                    break
-
-                if line.startswith('processing '):
-                    ok = True
-                else:
-                    ok = False
-                    error += line
+                    if line.startswith('processing '):
+                        ok = True
+                    else:
+                        ok = False
+                        error += line
 
             if error != '':
                 logging.error('exiftran (%s) error: %s' % (filename, error))
@@ -102,8 +100,9 @@ class Rotator(object):
             if orientation_cmd is None:
                 return True
 
-            logging.debug('rotate: jpegtran %s %s' %
-                          (orientation_cmd, filename))
+            logging.debug(
+                'rotate: jpegtran %s %s' % (orientation_cmd, filename)
+            )
 
             if self.__dryrun:
                 return True
@@ -111,20 +110,25 @@ class Rotator(object):
             handle, tmpfile = tempfile.mkstemp(dir=os.path.dirname(filename))
             os.close(handle)
 
-            cmd = 'jpegtran -copy all -outfile %s %s %s' % \
-                (tmpfile, orientation_cmd, filename)
+            cmd = 'jpegtran -copy all -outfile %s %s %s' % (
+                tmpfile,
+                orientation_cmd,
+                filename,
+            )
 
-            p = subprocess.Popen(
+            with subprocess.Popen(
                 cmd,
                 shell=True,
                 universal_newlines=True,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE).stderr
-
-            line = p.readline()
-            if line:
-                logging.error('jpegtran (%s) failed: %s' % (filename, line))
-                return False
+                stderr=subprocess.PIPE,
+            ) as p:
+                line = p.stderr.readline()
+                if line:
+                    logging.error(
+                        'jpegtran (%s) failed: %s' % (filename, line)
+                    )
+                    return False
 
             self.__clear_orientation_tag(tmpfile)
 
@@ -137,18 +141,17 @@ class Rotator(object):
             return False
 
     def __get_orientation_cmd(self, fullname):
-        orientation = self.__exiftool.get_tag(ORIENTATION_TAG, fullname)
-        if orientation is not None and \
-                0 <= orientation and orientation < len(JPEGTRAN_COMMAND):
+        tags = self.__exiftool.get_tags(fullname, ORIENTATION_TAG)
+        if ORIENTATION_TAG not in tags:
+            return None
+        orientation = tags[ORIENTATION_TAG]
+        if 0 <= orientation and orientation < len(JPEGTRAN_COMMAND):
             return JPEGTRAN_COMMAND[orientation]
         else:
             return None
 
     def __clear_orientation_tag(self, fullname):
-        res = self.__exiftool.set_tags(
-            {ORIENTATION_TAG: 1}, fullname).decode('utf-8')
-        if not exiftool.check_ok(res):
-            raise SystemError('exiftool error: ' + exiftool.format_error(res))
+        self.__exiftool.set_tags(fullname, {ORIENTATION_TAG: 1})
         try:
             os.remove(fullname + '_original')
         except Exception:
@@ -159,13 +162,5 @@ class Rotator(object):
             'total': len(self.__filenames),
             'processed': self.__processed,
             'good': self.__good,
-            'errors': self.__errors}
-
-
-if __name__ == '__main__':
-    import sys
-
-    rot = Rotator(config.Config(), sys.argv[1:], False)
-    rot.run()
-
-    print(rot.status())
+            'errors': self.__errors,
+        }

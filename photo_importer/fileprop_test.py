@@ -1,20 +1,19 @@
 #!/usr/bin/python3
 
-import os
-import sys
 import unittest
 import datetime
 
-sys.path.insert(0, os.path.abspath('..'))
-
-from photo_importer import config  # noqa
-from photo_importer import fileprop  # noqa
+from . import config
+from . import fileprop
 
 
 class TestFileProp(unittest.TestCase):
     def setUp(self):
         self.conf = config.Config()
         self.fp = fileprop.FileProp(self.conf)
+        self.conf.set('main', 'time_src_image', 'name')
+        self.conf.set('main', 'time_src_video', 'name')
+        self.conf.set('main', 'time_src_audio', 'name')
 
     # photo
     def test_camera_photo(self):
@@ -145,7 +144,3 @@ class TestFileProp(unittest.TestCase):
         self.assertEqual(fp.type(), fileprop.GARBAGE)
         self.assertEqual(fp.time(), None)
         self.assertEqual(fp.ok(), False)
-
-
-if __name__ == '__main__':
-    unittest.main()

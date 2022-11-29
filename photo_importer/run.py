@@ -1,17 +1,13 @@
 #!/usr/bin/python3
 
-import os
-import sys
 import logging
 import argparse
 import threading
 import progressbar
 
-sys.path.insert(0, os.path.abspath('..'))
-
-from photo_importer import log  # noqa
-from photo_importer import config  # noqa
-from photo_importer import importer  # noqa
+from . import log
+from . import config
+from . import importer
 
 
 class ProgressBar(threading.Thread):
@@ -31,10 +27,15 @@ class ProgressBar(threading.Thread):
         self.__pbar = progressbar.ProgressBar(
             maxval=count,
             widgets=[
-                name, ' ',
-                progressbar.Percentage(), ' ',
-                progressbar.Bar(), ' ',
-                progressbar.ETA()]).start()
+                name,
+                ' ',
+                progressbar.Percentage(),
+                ' ',
+                progressbar.Bar(),
+                ' ',
+                progressbar.ETA(),
+            ],
+        ).start()
 
     def run(self):
         stage = ''
@@ -58,8 +59,9 @@ class ProgressBar(threading.Thread):
                         self.__pbar.finish()
                     break
 
-            if (stage == 'move' or stage == 'rotate') and \
-                    self.__pbar is not None:
+            if (
+                stage == 'move' or stage == 'rotate'
+            ) and self.__pbar is not None:
                 self.__pbar.update(stat[stage]['processed'])
 
 
@@ -80,11 +82,7 @@ def main():
 
     log.initLogger(args.logfile)
 
-    imp = importer.Importer(
-        cfg,
-        args.in_path,
-        args.out_path,
-        args.dryrun)
+    imp = importer.Importer(cfg, args.in_path, args.out_path, args.dryrun)
 
     pbar = ProgressBar(imp)
     imp.start()

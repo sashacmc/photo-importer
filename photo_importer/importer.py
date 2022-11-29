@@ -1,17 +1,13 @@
 #!/usr/bin/python3
 
 import os
-import sys
 import logging
 import threading
 
-sys.path.insert(0, os.path.abspath('..'))
-
-from photo_importer import log  # noqa
-from photo_importer import mover  # noqa
-from photo_importer import config  # noqa
-from photo_importer import rotator  # noqa
-from photo_importer import fileprop  # noqa
+from . import log
+from . import mover
+from . import rotator
+from . import fileprop
 
 
 class Importer(threading.Thread):
@@ -28,8 +24,9 @@ class Importer(threading.Thread):
 
     def run(self):
         logging.info(
-            'Start: %s -> %s (dryrun: %s)' %
-            (self.__input_path, self.__output_path, self.__dryrun))
+            'Start: %s -> %s (dryrun: %s)'
+            % (self.__input_path, self.__output_path, self.__dryrun)
+        )
 
         filenames, dirs = self.__scan_files(self.__input_path)
 
@@ -48,7 +45,8 @@ class Importer(threading.Thread):
         res_dir = []
         res = []
         for root, dirs, files in os.walk(
-                input_path, onerror=self.__on_walk_error):
+            input_path, onerror=self.__on_walk_error
+        ):
 
             for fname in files:
                 res.append(os.path.join(root, fname))
@@ -72,7 +70,8 @@ class Importer(threading.Thread):
             self.__input_path,
             self.__output_path,
             filenames,
-            self.__dryrun)
+            self.__dryrun,
+        )
         self.__stat['stage'] = 'move'
 
         res = self.__mov.run()
@@ -88,10 +87,7 @@ class Importer(threading.Thread):
 
     def __rotate_files(self, filenames):
         logging.info('Rotating')
-        self.__rot = rotator.Rotator(
-            self.__config,
-            filenames,
-            self.__dryrun)
+        self.__rot = rotator.Rotator(self.__config, filenames, self.__dryrun)
         self.__stat['stage'] = 'rotate'
 
         self.__rot.run()
@@ -117,15 +113,3 @@ class Importer(threading.Thread):
 
     def log_text(self):
         return self.__log.get_text()
-
-
-if __name__ == '__main__':
-    import sys
-
-    log.initLogger()
-
-    imp = Importer(config.Config(), sys.argv[1], sys.argv[2], False)
-    imp.start()
-    imp.join()
-
-    print(imp.status())
