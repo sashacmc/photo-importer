@@ -7,7 +7,6 @@ import tempfile
 import subprocess
 import concurrent.futures
 
-from . import config
 
 JPEGTRAN_COMMAND = {
     0: None,
@@ -126,7 +125,9 @@ class Rotator(object):
             ) as p:
                 line = p.stderr.readline()
                 if line:
-                    logging.error('jpegtran (%s) failed: %s' % (filename, line))
+                    logging.error(
+                        'jpegtran (%s) failed: %s' % (filename, line)
+                    )
                     return False
 
             self.__clear_orientation_tag(tmpfile)

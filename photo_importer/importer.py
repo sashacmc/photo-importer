@@ -6,7 +6,6 @@ import threading
 
 from . import log
 from . import mover
-from . import config
 from . import rotator
 from . import fileprop
 

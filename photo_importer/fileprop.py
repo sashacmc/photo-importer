@@ -221,7 +221,9 @@ class FilePropRes(object):
         if path is None:
             path = self.__path
 
-        return self.__prop_ptr._out_name_full(path, self.__out_name, self.__ext)
+        return self.__prop_ptr._out_name_full(
+            path, self.__out_name, self.__ext
+        )
 
 
 if __name__ == '__main__':

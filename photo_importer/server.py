@@ -157,7 +157,9 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
                             100.0 * stat[stage]['processed'] / stat['total']
                         )
                     elif stage == 'done':
-                        cerr = stat['move']['errors'] + stat['rotate']['errors']
+                        cerr = (
+                            stat['move']['errors'] + stat['rotate']['errors']
+                        )
                         if cerr != 0:
                             r['state'] = 'error'
                             r['total'] = cerr
@@ -279,7 +281,9 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
         try:
             if (path[0]) == '/':
                 path = path[1:]
-            fname = os.path.normpath(os.path.join(self.server.web_path(), path))
+            fname = os.path.normpath(
+                os.path.join(self.server.web_path(), path)
+            )
             if not fname.startswith(self.server.web_path()):
                 logging.warning('incorrect path: ' + path)
                 raise HTTPError(HTTPStatus.NOT_FOUND, path)
