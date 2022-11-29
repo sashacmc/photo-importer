@@ -38,7 +38,7 @@ Standalone web server for fast media import for headless computer
 
 #### Installing via PyPi
 ```bash
-sudo apt install exiftran pmount
+sudo apt install exiftran pmount pip
 sudo pip install photo-importer
 ```
 #### Installing as debian package
@@ -48,8 +48,8 @@ sudo dpkg -i ../photo-importer_1.2.0_all.deb
 ```
 #### Installing via setup.py
 ```bash
+sudo apt install exiftran pmount pip
 sudo pip install PyExifTool progressbar psutil
-sudo apt install exiftran pmount
 sudo python3 ./setup.py install
 ```
 
