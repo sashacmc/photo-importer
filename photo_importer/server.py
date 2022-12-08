@@ -8,6 +8,7 @@ import psutil
 import urllib
 import logging
 import argparse
+import subprocess
 import http.server
 from http import HTTPStatus
 
@@ -41,8 +42,14 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(bytearray(result, 'utf-8'))
 
-    def __error_response(self, code, err):
+    def __error_response_get(self, code, err):
         self.send_error(code, explain=str(err))
+
+    def __error_response_post(self, code, explain):
+        self.send_response(code)
+        self.send_header('Content-type', 'text/plain')
+        self.end_headers()
+        self.wfile.write(bytearray(explain, 'utf-8'))
 
     def __get_mounted_list(self):
         return {
@@ -186,15 +193,41 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             self.server.import_done(device['mount_path'])
         return device['dev_path']
 
+    def __run_cmd(self, cmd):
+        error = ''
+        try:
+            logging.info('run cmd: %s' % cmd)
+
+            with subprocess.Popen(
+                cmd,
+                shell=True,
+                universal_newlines=True,
+                stderr=subprocess.PIPE,
+            ) as p:
+                while True:
+                    line = p.stderr.readline()
+                    if not line:
+                        break
+                    error += line
+
+            if error != '':
+                logging.error('cmd run error: %s' % error.strip())
+
+        except Exception:
+            logging.exception('cmd run exception')
+
+        if error != '':
+            raise HTTPError(HTTPStatus.INTERNAL_SERVER_ERROR, error)
+
+        return True
+
     def __mount_mount(self, dev):
         dev_path = self.__check_dev_for_mount(dev)
-        logging.debug('pmount %s', dev_path)
-        return os.system('pmount --umask=000 %s' % dev_path)
+        return self.__run_cmd('pmount --umask=000 %s' % dev_path)
 
     def __mount_umount(self, dev):
         dev_path = self.__check_dev_for_mount(dev)
-        logging.debug('pumount %s', dev_path)
-        return os.system('pumount %s' % dev_path)
+        return self.__run_cmd('pumount %s' % dev_path)
 
     def __mount_request(self, params):
         try:
@@ -340,9 +373,11 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             logging.warning('Wrong path: ' + path)
             raise HTTPError(HTTPStatus.NOT_FOUND, path)
         except HTTPError as ex:
-            self.__error_response(ex.code, ex.reason)
+            self.__error_response_get(ex.code, ex.reason)
         except Exception as ex:
-            self.__error_response(HTTPStatus.INTERNAL_SERVER_ERROR, str(ex))
+            self.__error_response_get(
+                HTTPStatus.INTERNAL_SERVER_ERROR, str(ex)
+            )
             logging.exception(ex)
 
     def do_POST(self):
@@ -358,9 +393,11 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
                 self.__import_request(params)
                 return
         except HTTPError as ex:
-            self.__error_response(ex.code, ex.reason)
+            self.__error_response_post(ex.code, ex.reason)
         except Exception as ex:
-            self.__error_response(HTTPStatus.INTERNAL_SERVER_ERROR, str(ex))
+            self.__error_response_post(
+                HTTPStatus.INTERNAL_SERVER_ERROR, str(ex)
+            )
             logging.exception(ex)
 
 

@@ -31,7 +31,7 @@ class Config(object):
         },
         'server': {
             'port': 8080,
-            'web_path': '../web',
+            'web_path': 'web',
             'out_path': '/mnt/multimedia/NEW/',
             'in_path': '',
             'log_file': 'photo-importer-server.log',
