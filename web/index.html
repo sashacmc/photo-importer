@@ -141,7 +141,10 @@
                     type: "POST",
                     success: function() {  
                         update()
-                    }  
+                    },
+                    error: function (request, status, error) {
+                        alert(request.responseText)
+                    }
                 });
             } else
             if (cmd == "start") { 
@@ -154,7 +157,10 @@
                     type: "POST",
                     success: function() {  
                         update()
-                    }  
+                    },
+                    error: function (request, status, error) {
+                        alert(request.responseText)
+                    }
                 });
             }
         }

@@ -22,7 +22,8 @@ def initLogger(filename=None, level=logging.INFO):
             os.makedirs(os.path.split(filename)[0])
         except OSError:
             pass
-        fh = logging.FileHandler(filename, 'a')
+        mode = 'a' if os.path.isfile(filename) else 'w'
+        fh = logging.FileHandler(filename, mode)
     else:
         fh = logging.StreamHandler()
 
