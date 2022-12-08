@@ -1,3 +1,11 @@
+photo-importer (1.2.1) stable; urgency=medium
+
+  * Handle server pmount errors
+  * Allow log to /dev/stdout
+  * Add aac files support
+
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Thu, 08 Dec 2022 21:49:03 +0100
+
 photo-importer (1.2.0) stable; urgency=medium
 
   * Add PyPi install support
