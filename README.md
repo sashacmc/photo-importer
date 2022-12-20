@@ -1,8 +1,9 @@
 # Photo Importer
 
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/sashacmc/photo-importer.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/sashacmc/photo-importer/alerts/)
-[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/sashacmc/photo-importer.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/sashacmc/photo-importer/context:javascript)
-[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/sashacmc/photo-importer.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/sashacmc/photo-importer/context:python)
+![CodeQL](https://github.com/sashacmc/photo-importer/workflows/CodeQL/badge.svg)
+[![PyPI - Version](https://img.shields.io/pypi/v/photo-importer.svg)](https://pypi.org/project/photo-importer)
+[![PyPI - Downloads](https://pepy.tech/badge/photo-importer)](https://pepy.tech/project/photo-importer)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Command line tools for photo importing/renaming/rotating
 ### Features:
