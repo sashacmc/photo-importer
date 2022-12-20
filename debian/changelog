@@ -1,3 +1,11 @@
+photo-importer (1.2.2) stable; urgency=medium
+
+  * Add /etc/photo-importer.cfg as additional default config
+  * Add add_orig_name option
+  * Update config comments
+
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Tue, 20 Dec 2022 01:01:34 +0100
+
 photo-importer (1.2.1) stable; urgency=medium
 
   * Handle server pmount errors

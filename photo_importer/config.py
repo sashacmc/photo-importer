@@ -5,7 +5,10 @@ import configparser
 
 
 class Config(object):
-    DEFAULT_CONFIG_FILE = os.path.expanduser('~/.photo-importer.cfg')
+    DEFAULT_CONFIG_FILES = (
+        os.path.expanduser('~/.photo-importer.cfg'),
+        '/etc/photo-importer.cfg',
+    )
     DEFAULTS = {
         'main': {
             'out_time_format': '%%Y-%%m-%%d_%%H-%%M-%%S',
@@ -28,6 +31,7 @@ class Config(object):
             'umask': '0o000',
             'use_jpegtran': 0,
             'use_shutil': 0,
+            'add_orig_name': 0,
         },
         'server': {
             'port': 8080,
@@ -40,7 +44,9 @@ class Config(object):
 
     def __init__(self, filename=None, create=False):
         if filename is None:
-            filename = self.DEFAULT_CONFIG_FILE
+            for f in self.DEFAULT_CONFIG_FILES:
+                if os.path.exists(f):
+                    filename = f
 
         self.__config = configparser.ConfigParser()
         self.__config.read_dict(self.DEFAULTS)
@@ -54,10 +60,10 @@ class Config(object):
             self.__create_if_not_exists()
 
     def __create_if_not_exists(self):
-        if os.path.exists(self.DEFAULT_CONFIG_FILE):
+        if os.path.exists(self.DEFAULT_CONFIG_FILES[0]):
             return
 
-        with open(self.DEFAULT_CONFIG_FILE, 'w') as conffile:
+        with open(self.DEFAULT_CONFIG_FILES[0], 'w') as conffile:
             self.__config.write(conffile)
 
     def __getitem__(self, sect):
