@@ -43,6 +43,8 @@ class FileProp(object):
         (re.compile('\d{8}'), '%Y%m%d'),
     ]
 
+    SPACE_REGEX = re.compile(r'\s+')
+
     TIME_SRC_CFG = {
         IMAGE: 'time_src_image',
         VIDEO: 'time_src_video',
@@ -156,6 +158,15 @@ class FileProp(object):
         except (FileNotFoundError, KeyError) as ex:
             logging.warning('time by attr (%s) exception: %s' % (fullname, ex))
 
+    def __calc_orig_name(self, fname):
+        if not int(self.__config['main']['add_orig_name']):
+            return ''
+        for exp, fs in self.DATE_REGEX:
+            mat = exp.findall(fname)
+            if len(mat):
+                return ''
+        return '_' + self.SPACE_REGEX.sub('_', fname)
+
     def _out_name_full(self, path, out_name, ext):
         res = os.path.join(path, out_name) + ext
 
@@ -177,7 +188,9 @@ class FileProp(object):
         ftime = self.__time(fullname, fname, tp)
 
         if ftime:
-            out_name = ftime.strftime(self.__config['main']['out_time_format'])
+            out_name = ftime.strftime(
+                self.__config['main']['out_time_format']
+            ) + self.__calc_orig_name(fname)
         else:
             out_name = None
 
