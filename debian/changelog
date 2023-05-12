@@ -1,4 +1,4 @@
-photo-importer (1.2.2) stable; urgency=medium
+photo-importer (1.2.2-dd) stable; urgency=medium
 
   * Add /etc/photo-importer.cfg as additional default config
   * Add add_orig_name option

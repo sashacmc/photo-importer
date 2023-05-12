@@ -5,6 +5,7 @@ Conflicts=getty@tty1.service
 
 [Service]
 Type=simple
+Environment="DD_MAIN_PACKAGE=photo-importer"
 ExecStart=/usr/bin/photo-importer-server -c /etc/photo-importer.cfg
 StandardInput=tty-force
 

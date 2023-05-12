@@ -1,3 +1,4 @@
+import ddtrace.sourcecode.setuptools_auto
 from setuptools import setup
 import os
 
@@ -25,7 +26,7 @@ setup(
         ('/lib/systemd/system/', ['photo-importer.service']),
         ('share/photo-importer/web/', ['web/index.html', 'web/log.png']),
     ],
-    install_requires=['PyExifTool', 'progressbar', 'psutil'],
+    install_requires=['PyExifTool', 'progressbar', 'psutil', 'ddtrace'],
     scripts=['photo-importer', 'photo-importer-server'],
     url='https://github.com/sashacmc/photo-importer',
     long_description=get_long_description(),
