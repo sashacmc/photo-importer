@@ -50,11 +50,13 @@ class Config(object):
 
         self.__config = configparser.ConfigParser()
         self.__config.read_dict(self.DEFAULTS)
-        self.__config.read(
-            [
-                filename,
-            ]
-        )
+
+        if filename is not None:
+            self.__config.read(
+                [
+                    filename,
+                ]
+            )
 
         if create:
             self.__create_if_not_exists()
