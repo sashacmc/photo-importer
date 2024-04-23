@@ -14,7 +14,7 @@ def get_long_description():
 
 setup(
     name='photo-importer',
-    version='1.2.2',
+    version='1.2.3',
     description='Photo importer tool',
     author='Alexander Bushnev',
     author_email='Alexander@Bushnev.pro',

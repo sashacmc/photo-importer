@@ -1,3 +1,10 @@
+photo-importer (1.2.3) stable; urgency=medium
+
+  * Update ci workflows
+  * Fix import without config file and warning
+
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Tue, 23 Apr 2024 23:28:02 +0200
+
 photo-importer (1.2.2) stable; urgency=medium
 
   * Add /etc/photo-importer.cfg as additional default config
