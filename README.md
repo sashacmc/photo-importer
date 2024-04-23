@@ -122,3 +122,6 @@ For options details see comments in the config file.
 Thanks to everyone who tested and gave advice.
 
 **Bug reports, suggestions and pull request are welcome!**
+
+## Show your support
+Give a ⭐️ if this project helped you!
