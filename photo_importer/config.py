@@ -32,6 +32,7 @@ class Config(object):
             'use_jpegtran': 0,
             'use_shutil': 0,
             'add_orig_name': 0,
+            'time_shift': 0,
         },
         'server': {
             'port': 8080,

@@ -1,3 +1,10 @@
+photo-importer (1.2.4) stable; urgency=medium
+
+  * Add time_shift options
+  * Lower case file ext during renaming 
+
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Wed, 22 May 2024 23:12:07 +0200
+
 photo-importer (1.2.3) stable; urgency=medium
 
   * Update ci workflows
