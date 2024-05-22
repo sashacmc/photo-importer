@@ -16,7 +16,7 @@ AUDIO = 3
 GARBAGE = 4
 
 
-class FileProp(object):
+class FileProp:
     DATE_REGEX = [
         (
             re.compile(r'\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}'),
@@ -59,8 +59,6 @@ class FileProp(object):
         IGNORE: 'file_ext_ignore',
     }
 
-    EXT_TO_TYPE = {}
-
     DATE_TAGS = [
         'EXIF:DateTimeOriginal',
         'H264:DateTimeOriginal',
@@ -80,17 +78,17 @@ class FileProp(object):
         self.__exiftool.terminate()
 
     def __prepare_ext_to_type(self):
-        self.EXT_TO_TYPE = {}
+        self.ext_to_type = {}
         for tp, cfg in self.FILE_EXT_CFG.items():
             for ext in self.__config['main'][cfg].split(','):
                 ext = '.' + ext.lower()
-                if ext in self.EXT_TO_TYPE:
+                if ext in self.ext_to_type:
                     logging.fatal('Double ext: ' + ext)
-                self.EXT_TO_TYPE[ext] = tp
+                self.ext_to_type[ext] = tp
 
     def __type_by_ext(self, ext):
         try:
-            return self.EXT_TO_TYPE[ext]
+            return self.ext_to_type[ext]
         except KeyError:
             logging.warning('Unknown ext: ' + ext)
             return IGNORE
@@ -141,8 +139,7 @@ class FileProp(object):
                     return datetime.datetime.strptime(md, '%Y:%m:%d %H:%M:%S')
 
             logging.warning(
-                'time by exif (%s) not found tags count: %s'
-                % (fullname, len(metadata))
+                'time by exif (%s) not found tags count: %s' % (fullname, len(metadata))
             )
             for tag, val in metadata.items():
                 logging.debug('%s: %s' % (tag, val))
@@ -238,9 +235,7 @@ class FilePropRes(object):
         if path is None:
             path = self.__path
 
-        return self.__prop_ptr._out_name_full(
-            path, self.__out_name, self.__ext
-        )
+        return self.__prop_ptr._out_name_full(path, self.__out_name, self.__ext)
 
 
 if __name__ == '__main__':

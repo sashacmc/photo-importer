@@ -4,7 +4,7 @@ import os
 import configparser
 
 
-class Config(object):
+class Config:
     DEFAULT_CONFIG_FILES = (
         os.path.expanduser('~/.photo-importer.cfg'),
         '/etc/photo-importer.cfg',
@@ -66,7 +66,7 @@ class Config(object):
         if os.path.exists(self.DEFAULT_CONFIG_FILES[0]):
             return
 
-        with open(self.DEFAULT_CONFIG_FILES[0], 'w') as conffile:
+        with open(self.DEFAULT_CONFIG_FILES[0], 'w', encoding='utf-8') as conffile:
             self.__config.write(conffile)
 
     def __getitem__(self, sect):
