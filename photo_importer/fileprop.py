@@ -19,28 +19,28 @@ GARBAGE = 4
 class FileProp(object):
     DATE_REGEX = [
         (
-            re.compile('\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}'),
+            re.compile(r'\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}'),
             '%Y-%m-%d_%H-%M-%S',
         ),
         (
-            re.compile('\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}'),
+            re.compile(r'\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}'),
             '%Y-%m-%d-%H-%M-%S',
         ),
         (
-            re.compile('\d{4}-\d{2}-\d{2}T\d{2}.\d{2}.\d{2}'),
+            re.compile(r'\d{4}-\d{2}-\d{2}T\d{2}.\d{2}.\d{2}'),
             '%Y-%m-%dT%H.%M.%S',
         ),
         (
-            re.compile('\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}'),
+            re.compile(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}'),
             '%Y-%m-%dT%H:%M:%S',
         ),
         (
-            re.compile('\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2}'),
+            re.compile(r'\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2}'),
             '%Y_%m_%d_%H_%M_%S',
         ),
-        (re.compile('\d{8}_\d{6}'), '%Y%m%d_%H%M%S'),
-        (re.compile('\d{14}'), '%Y%m%d%H%M%S'),
-        (re.compile('\d{8}'), '%Y%m%d'),
+        (re.compile(r'\d{8}_\d{6}'), '%Y%m%d_%H%M%S'),
+        (re.compile(r'\d{14}'), '%Y%m%d%H%M%S'),
+        (re.compile(r'\d{8}'), '%Y%m%d'),
     ]
 
     SPACE_REGEX = re.compile(r'\s+')

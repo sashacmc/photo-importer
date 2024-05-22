@@ -62,6 +62,6 @@ class TestImporter(unittest.TestCase):
             self.assertEqual(
                 files[1],
                 os.path.join(
-                    tmpdirname, 'Foto/2022/2022-11-21/2022-11-21_00-42-07.JPG'
+                    tmpdirname, 'Foto/2022/2022-11-21/2022-11-21_00-42-07.jpg'
                 ),
             )
