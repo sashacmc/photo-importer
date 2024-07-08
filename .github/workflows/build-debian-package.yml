@@ -32,12 +32,18 @@ jobs:
           sudo apt-get build-dep .
           # Build the Debian package
           debuild -us -uc -b
+      
+      - name: Create artifact directory
+        run: mkdir -p artifacts
+
+      - name: Move Debian package to artifact directory
+        run: mv ../*.deb artifacts/
 
       - name: Test Debian package installation
         run: |
           sudo apt install -y pip python3-exif python3-progressbar exiftran python3-psutil
           sudo pip install PyExifTool
-          sudo dpkg -i ../*.deb
+          sudo dpkg -i artifacts/*.deb
           sudo systemctl enable photo-importer.service
           sudo systemctl restart photo-importer.service
           sudo systemctl status photo-importer.service
@@ -47,4 +53,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: debian-package
-          path: ../*.deb
+          path: artifacts/*.deb
