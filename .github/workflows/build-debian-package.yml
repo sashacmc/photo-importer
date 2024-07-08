@@ -35,6 +35,7 @@ jobs:
 
       - name: Test Debian package installation
         run: |
+          sudo apt-get install -y python3-exif python3-progressbar exiftran python3-psutil
           sudo dpkg -i ../*.deb
           sudo systemctl enable photo-importer.service
           sudo systemctl start photo-importer.service

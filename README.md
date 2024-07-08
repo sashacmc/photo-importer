@@ -50,7 +50,8 @@ sudo pip install photo-importer
 #### Installing as debian package
 ```bash
 debuild -b
-sudo dpkg -i ../photo-importer_1.2.0_all.deb
+sudo apt install python3-exif python3-progressbar exiftran python3-psutil
+sudo dpkg -i ../photo-importer_1.2.5_all.deb
 ```
 #### Installing via setup.py
 ```bash
