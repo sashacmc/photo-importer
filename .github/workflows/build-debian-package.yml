@@ -38,8 +38,9 @@ jobs:
           sudo apt-get install -y python3-exif python3-progressbar exiftran python3-psutil
           sudo dpkg -i ../*.deb
           sudo systemctl enable photo-importer.service
-          sudo systemctl start photo-importer.service
-          curl localhost:8080
+          sudo systemctl restart photo-importer.service
+          sudo systemctl status photo-importer.service
+          photo-importer -h
 
       - name: Upload Debian package as artifact
         uses: actions/upload-artifact@v2
