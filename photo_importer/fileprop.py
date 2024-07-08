@@ -1,12 +1,13 @@
 #!/usr/bin/python3
+# pylint: disable=too-many-arguments
 
 import os
 import re
 import stat
 import time
 import logging
-import exiftool
 import datetime
+import exiftool
 
 
 IGNORE = 0
@@ -16,7 +17,7 @@ AUDIO = 3
 GARBAGE = 4
 
 
-class FileProp(object):
+class FileProp:
     DATE_REGEX = [
         (
             re.compile(r'\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}'),
@@ -59,8 +60,6 @@ class FileProp(object):
         IGNORE: 'file_ext_ignore',
     }
 
-    EXT_TO_TYPE = {}
-
     DATE_TAGS = [
         'EXIF:DateTimeOriginal',
         'H264:DateTimeOriginal',
@@ -70,8 +69,8 @@ class FileProp(object):
         'EXIF:CreateDate',
     ]
 
-    def __init__(self, config):
-        self.__config = config
+    def __init__(self, conf):
+        self.__config = conf
         self.__prepare_ext_to_type()
         self.__out_list = set()
         self.__exiftool = exiftool.ExifToolHelper()
@@ -80,19 +79,19 @@ class FileProp(object):
         self.__exiftool.terminate()
 
     def __prepare_ext_to_type(self):
-        self.EXT_TO_TYPE = {}
+        self.ext_to_type = {}
         for tp, cfg in self.FILE_EXT_CFG.items():
             for ext in self.__config['main'][cfg].split(','):
                 ext = '.' + ext.lower()
-                if ext in self.EXT_TO_TYPE:
-                    logging.fatal('Double ext: ' + ext)
-                self.EXT_TO_TYPE[ext] = tp
+                if ext in self.ext_to_type:
+                    logging.fatal('Double ext: %s', ext)
+                self.ext_to_type[ext] = tp
 
     def __type_by_ext(self, ext):
         try:
-            return self.EXT_TO_TYPE[ext]
+            return self.ext_to_type[ext]
         except KeyError:
-            logging.warning('Unknown ext: ' + ext)
+            logging.warning('Unknown ext: %s', ext)
             return IGNORE
 
     def __time(self, fullname, name, tp):
@@ -100,18 +99,18 @@ class FileProp(object):
             return None
 
         for src in self.__config['main'][self.TIME_SRC_CFG[tp]].split(','):
-            time = None
+            ftime = None
             if src == 'exif':
-                time = self.__time_by_exif(fullname)
+                ftime = self.__time_by_exif(fullname)
             elif src == 'name':
-                time = self.__time_by_name(name)
+                ftime = self.__time_by_name(name)
             elif src == 'attr':
-                time = self.__time_by_attr(fullname)
+                ftime = self.__time_by_attr(fullname)
             else:
-                raise Exception('Wrong time_src: ' + src)
+                raise UserWarning(f'Wrong time_src: {src}')
 
-            if time:
-                return time
+            if ftime:
+                return ftime
 
         return None
 
@@ -120,11 +119,11 @@ class FileProp(object):
             mat = exp.findall(fname)
             if len(mat):
                 try:
-                    time = datetime.datetime.strptime(mat[0], fs)
-                    if time.year < 1990 or time.year > 2100:
+                    ftime = datetime.datetime.strptime(mat[0], fs)
+                    if ftime.year < 1990 or ftime.year > 2100:
                         continue
 
-                    return time
+                    return ftime
                 except ValueError:
                     pass
         return None
@@ -140,15 +139,12 @@ class FileProp(object):
                         md = md[0:pos]
                     return datetime.datetime.strptime(md, '%Y:%m:%d %H:%M:%S')
 
-            logging.warning(
-                'time by exif (%s) not found tags count: %s'
-                % (fullname, len(metadata))
-            )
+            logging.warning('time by exif (%s) not found tags count: %s', fullname, len(metadata))
             for tag, val in metadata.items():
-                logging.debug('%s: %s' % (tag, val))
-            return None
+                logging.debug('%s: %s', tag, val)
         except Exception as ex:
-            logging.warning('time by exif (%s) exception: %s' % (fullname, ex))
+            logging.warning('time by exif (%s) exception: %s', fullname, ex)
+        return None
 
     def __time_by_attr(self, fullname):
         try:
@@ -156,18 +152,19 @@ class FileProp(object):
                 time.mktime(time.localtime(os.stat(fullname)[stat.ST_MTIME]))
             )
         except (FileNotFoundError, KeyError) as ex:
-            logging.warning('time by attr (%s) exception: %s' % (fullname, ex))
+            logging.warning('time by attr (%s) exception: %s', fullname, ex)
+        return None
 
     def __calc_orig_name(self, fname):
         if not int(self.__config['main']['add_orig_name']):
             return ''
-        for exp, fs in self.DATE_REGEX:
+        for exp, _ in self.DATE_REGEX:
             mat = exp.findall(fname)
             if len(mat):
                 return ''
         return '_' + self.SPACE_REGEX.sub('_', fname)
 
-    def _out_name_full(self, path, out_name, ext):
+    def out_name_full(self, path, out_name, ext):
         res = os.path.join(path, out_name) + ext
 
         i = 1
@@ -206,11 +203,11 @@ class FileProp(object):
         return FilePropRes(self, tp, ftime, path, ext, out_name, ok)
 
 
-class FilePropRes(object):
-    def __init__(self, prop_ptr, tp, time, path, ext, out_name, ok):
+class FilePropRes:
+    def __init__(self, prop_ptr, tp, ftime, path, ext, out_name, ok):
         self.__prop_ptr = prop_ptr
         self.__type = tp
-        self.__time = time
+        self.__time = ftime
         self.__path = path
         self.__ext = ext
         self.__out_name = out_name
@@ -238,9 +235,7 @@ class FilePropRes(object):
         if path is None:
             path = self.__path
 
-        return self.__prop_ptr._out_name_full(
-            path, self.__out_name, self.__ext
-        )
+        return self.__prop_ptr.out_name_full(path, self.__out_name, self.__ext)
 
 
 if __name__ == '__main__':
@@ -251,7 +246,7 @@ if __name__ == '__main__':
     from photo_importer import log
     from photo_importer import config
 
-    log.initLogger(None, logging.DEBUG)
+    log.init_logger(None, logging.DEBUG)
 
     fp = FileProp(config.Config()).get(sys.argv[1])
     print(fp.type(), fp.time(), fp.ok())

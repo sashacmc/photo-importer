@@ -5,9 +5,9 @@ import argparse
 import threading
 import progressbar
 
-from . import log
-from . import config
-from . import importer
+from photo_importer import log
+from photo_importer import config
+from photo_importer import importer
 
 
 class ProgressBar(threading.Thread):
@@ -48,7 +48,7 @@ class ProgressBar(threading.Thread):
                     print('Scan... ', end='', flush=True)
                     continue
                 if stage == 'move':
-                    print('Done. Found %i files' % stat['total'])
+                    print(f'Done. Found {stat["total"]} files')
                     self.__create('Import:', stat['total'])
                     continue
                 if stage == 'rotate':
@@ -59,9 +59,7 @@ class ProgressBar(threading.Thread):
                         self.__pbar.finish()
                     break
 
-            if (
-                stage == 'move' or stage == 'rotate'
-            ) and self.__pbar is not None:
+            if stage in ('move', 'rotate') and self.__pbar is not None:
                 self.__pbar.update(stat[stage]['processed'])
 
 
@@ -80,7 +78,7 @@ def main():
 
     cfg = config.Config(args.config)
 
-    log.initLogger(args.logfile)
+    log.init_logger(args.logfile)
 
     imp = importer.Importer(cfg, args.in_path, args.out_path, args.dryrun)
 
@@ -91,7 +89,7 @@ def main():
     pbar.join()
 
     status = imp.status()
-    logging.info('status: %s' % str(status))
+    logging.info('status: %s', str(status))
     if status['move']['errors'] != 0 or status['rotate']['errors'] != 0:
         print('Some errors found. Please check log file.')
 

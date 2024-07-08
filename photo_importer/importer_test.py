@@ -4,8 +4,8 @@ import os
 import unittest
 import tempfile
 
-from . import config
-from . import importer
+from photo_importer import config
+from photo_importer import importer
 
 
 class TestImporter(unittest.TestCase):
@@ -46,7 +46,7 @@ class TestImporter(unittest.TestCase):
             )
 
             files = []
-            for path, cd, fs in os.walk(tmpdirname):
+            for path, _, fs in os.walk(tmpdirname):
                 for f in fs:
                     print(os.path.join(path, f))
                     files.append(os.path.join(path, f))
@@ -55,13 +55,9 @@ class TestImporter(unittest.TestCase):
             self.assertEqual(len(files), 2)
             self.assertEqual(
                 files[0],
-                os.path.join(
-                    tmpdirname, 'Foto/2021/2021-12-19/2021-12-19_13-11-36.jpeg'
-                ),
+                os.path.join(tmpdirname, 'Foto/2021/2021-12-19/2021-12-19_13-11-36.jpeg'),
             )
             self.assertEqual(
                 files[1],
-                os.path.join(
-                    tmpdirname, 'Foto/2022/2022-11-21/2022-11-21_00-42-07.jpg'
-                ),
+                os.path.join(tmpdirname, 'Foto/2022/2022-11-21/2022-11-21_00-42-07.jpg'),
             )

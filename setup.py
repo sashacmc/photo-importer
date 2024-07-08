@@ -1,5 +1,5 @@
-from setuptools import setup
 import os
+from setuptools import setup
 
 
 def get_long_description():
@@ -12,7 +12,7 @@ def get_long_description():
 
 setup(
     name='photo-importer',
-    version='1.2.4',
+    version='1.2.5',
     description='Photo importer tool',
     author='Alexander Bushnev',
     author_email='Alexander@Bushnev.pro',

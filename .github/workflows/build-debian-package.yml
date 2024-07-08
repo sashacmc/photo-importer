@@ -1,0 +1,56 @@
+name: Build Debian Package
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Debian package
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y devscripts debhelper curl
+          # Ensure you have the necessary build dependencies
+          sudo apt-get build-dep .
+          # Build the Debian package
+          debuild -us -uc -b
+      
+      - name: Create artifact directory
+        run: mkdir -p artifacts
+
+      - name: Move Debian package to artifact directory
+        run: mv ../*.deb artifacts/
+
+      - name: Test Debian package installation
+        run: |
+          sudo apt install -y pip python3-exif python3-progressbar exiftran python3-psutil
+          sudo pip install PyExifTool
+          sudo dpkg -i artifacts/*.deb
+          sudo systemctl enable photo-importer.service
+          sudo systemctl restart photo-importer.service
+          sudo systemctl status photo-importer.service
+          photo-importer -h
+
+      - name: Upload Debian package as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: debian-package
+          path: artifacts/*.deb

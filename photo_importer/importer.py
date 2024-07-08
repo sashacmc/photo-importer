@@ -1,13 +1,14 @@
 #!/usr/bin/python3
+# pylint: disable=too-many-instance-attributes
 
 import os
 import logging
 import threading
 
-from . import log
-from . import mover
-from . import rotator
-from . import fileprop
+from photo_importer import log
+from photo_importer import mover
+from photo_importer import rotator
+from photo_importer import fileprop
 
 
 class Importer(threading.Thread):
@@ -24,8 +25,7 @@ class Importer(threading.Thread):
 
     def run(self):
         logging.info(
-            'Start: %s -> %s (dryrun: %s)'
-            % (self.__input_path, self.__output_path, self.__dryrun)
+            'Start: %s -> %s (dryrun: %s)', self.__input_path, self.__output_path, self.__dryrun
         )
 
         filenames, dirs = self.__scan_files(self.__input_path)
@@ -38,16 +38,13 @@ class Importer(threading.Thread):
         self.__rotate_files(new_filenames)
 
         self.__stat['stage'] = 'done'
-        logging.info('Done: %s' % str(self.status()))
+        logging.info('Done: %s', str(self.status()))
 
     def __scan_files(self, input_path):
         self.__stat['stage'] = 'scan'
         res_dir = []
         res = []
-        for root, dirs, files in os.walk(
-            input_path, onerror=self.__on_walk_error
-        ):
-
+        for root, dirs, files in os.walk(input_path, onerror=self.__on_walk_error):
             for fname in files:
                 res.append(os.path.join(root, fname))
 
@@ -57,17 +54,16 @@ class Importer(threading.Thread):
         self.__stat['total'] = len(res)
         res.sort()
         res_dir.sort()
-        logging.info('Found %i files and %i dirs' % (len(res), len(res_dir)))
+        logging.info('Found %i files and %i dirs', len(res), len(res_dir))
         return res, res_dir
 
     def __on_walk_error(self, err):
-        logging.error('Scan files error: %s' % err)
+        logging.error('Scan files error: %s', err)
 
     def __move_files(self, filenames):
         logging.info('Moving')
         self.__mov = mover.Mover(
             self.__config,
-            self.__input_path,
             self.__output_path,
             filenames,
             self.__dryrun,
@@ -75,12 +71,12 @@ class Importer(threading.Thread):
         self.__stat['stage'] = 'move'
 
         res = self.__mov.run()
-        logging.info('Processed %s files' % len(res))
+        logging.info('Processed %s files', len(res))
         return res
 
     def __image_filenames(self, move_result):
         res = []
-        for old, new, prop in move_result:
+        for _, new, prop in move_result:
             if prop.type() == fileprop.IMAGE:
                 res.append(new)
         return res
