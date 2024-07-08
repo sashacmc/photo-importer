@@ -1,0 +1,45 @@
+name: Build Debian Package
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Debian package
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y devscripts debhelper curl
+          # Ensure you have the necessary build dependencies
+          sudo apt-get build-dep .
+          # Build the Debian package
+          debuild -us -uc -b
+
+      - name: Test Debian package installation
+        run: |
+          sudo dpkg -i ../*.deb
+          sudo systemctl enable photo-importer.service
+          sudo systemctl start photo-importer.service
+          curl localhost:8080
+
+      - name: Upload Debian package as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: debian-package
+          path: ../*.deb
