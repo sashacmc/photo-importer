@@ -5,9 +5,9 @@ import argparse
 import threading
 import progressbar
 
-from . import log
-from . import config
-from . import importer
+from photo_importer import log
+from photo_importer import config
+from photo_importer import importer
 
 
 class ProgressBar(threading.Thread):

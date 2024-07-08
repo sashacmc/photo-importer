@@ -4,8 +4,8 @@ import os
 import unittest
 import tempfile
 
-from . import config
-from . import importer
+from photo_importer import config
+from photo_importer import importer
 
 
 class TestImporter(unittest.TestCase):

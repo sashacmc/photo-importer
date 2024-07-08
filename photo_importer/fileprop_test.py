@@ -4,8 +4,8 @@
 import unittest
 import datetime
 
-from . import config
-from . import fileprop
+from photo_importer import config
+from photo_importer import fileprop
 
 
 class TestFileProp(unittest.TestCase):
