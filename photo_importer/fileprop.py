@@ -123,7 +123,7 @@ class FileProp:
                     if ftime.year < 1990 or ftime.year > 2100:
                         continue
 
-                    return time
+                    return ftime
                 except ValueError:
                     pass
         return None
