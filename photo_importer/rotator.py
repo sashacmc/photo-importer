@@ -2,10 +2,10 @@
 
 import os
 import logging
-import exiftool
 import tempfile
 import subprocess
 import concurrent.futures
+import exiftool
 
 
 JPEGTRAN_COMMAND = {
@@ -23,7 +23,7 @@ JPEGTRAN_COMMAND = {
 ORIENTATION_TAG = 'EXIF:Orientation'
 
 
-class Rotator(object):
+class Rotator:
     def __init__(self, config, filenames, dryrun):
         self.__config = config
         self.__filenames = filenames
@@ -31,6 +31,7 @@ class Rotator(object):
         self.__processed = 0
         self.__good = 0
         self.__errors = 0
+        self.__exiftool = None
 
     def run(self):
         os.umask(int(self.__config['main']['umask'], 8))
@@ -43,10 +44,7 @@ class Rotator(object):
             tc = 1
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=tc) as executor:
-
-            futures = {
-                executor.submit(processor, fn): fn for fn in self.__filenames
-            }
+            futures = {executor.submit(processor, fn): fn for fn in self.__filenames}
 
             for future in concurrent.futures.as_completed(futures):
                 self.__processed += 1
@@ -61,8 +59,8 @@ class Rotator(object):
     def __process_exiftran(self, filename):
         ok = False
         try:
-            cmd = 'exiftran -aip "%s"' % filename
-            logging.debug('rotate: %s' % cmd)
+            cmd = f'exiftran -aip "{filename}"'
+            logging.debug('rotate: %s', cmd)
 
             if self.__dryrun:
                 return True
@@ -87,10 +85,10 @@ class Rotator(object):
                         error += line
 
             if error != '':
-                logging.error('exiftran (%s) error: %s' % (filename, error))
+                logging.error('exiftran (%s) error: %s', filename, error)
 
         except Exception as ex:
-            logging.error('Rotator exception (%s): %s' % (filename, ex))
+            logging.error('Rotator exception (%s): %s', filename, ex)
 
         return ok
 
@@ -100,9 +98,7 @@ class Rotator(object):
             if orientation_cmd is None:
                 return True
 
-            logging.debug(
-                'rotate: jpegtran %s %s' % (orientation_cmd, filename)
-            )
+            logging.debug('rotate: jpegtran %s %s', orientation_cmd, filename)
 
             if self.__dryrun:
                 return True
@@ -110,11 +106,7 @@ class Rotator(object):
             handle, tmpfile = tempfile.mkstemp(dir=os.path.dirname(filename))
             os.close(handle)
 
-            cmd = 'jpegtran -copy all -outfile %s %s %s' % (
-                tmpfile,
-                orientation_cmd,
-                filename,
-            )
+            cmd = 'jpegtran -copy all -outfile {tmpfile} {orientation_cmd} {filename}'
 
             with subprocess.Popen(
                 cmd,
@@ -125,9 +117,7 @@ class Rotator(object):
             ) as p:
                 line = p.stderr.readline()
                 if line:
-                    logging.error(
-                        'jpegtran (%s) failed: %s' % (filename, line)
-                    )
+                    logging.error('jpegtran (%s) failed: %s', filename, line)
                     return False
 
             self.__clear_orientation_tag(tmpfile)
@@ -137,7 +127,7 @@ class Rotator(object):
 
             return True
         except Exception as ex:
-            logging.error('Rotator exception (%s): %s' % (filename, ex))
+            logging.error('Rotator exception (%s): %s', filename, ex)
             return False
 
     def __get_orientation_cmd(self, fullname):
@@ -145,10 +135,10 @@ class Rotator(object):
         if ORIENTATION_TAG not in tags:
             return None
         orientation = tags[ORIENTATION_TAG]
-        if 0 <= orientation and orientation < len(JPEGTRAN_COMMAND):
+        if 0 <= orientation < len(JPEGTRAN_COMMAND):
             return JPEGTRAN_COMMAND[orientation]
-        else:
-            return None
+
+        return None
 
     def __clear_orientation_tag(self, fullname):
         self.__exiftool.set_tags(fullname, {ORIENTATION_TAG: 1})

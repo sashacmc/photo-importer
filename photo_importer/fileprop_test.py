@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# pylint: disable=too-many-public-methods
 
 import unittest
 import datetime
