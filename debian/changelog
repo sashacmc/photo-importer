@@ -1,3 +1,10 @@
+photo-importer (1.2.5) stable; urgency=medium
+
+  * Package refactoring
+  * Code cleanup
+
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Tue, 09 Jul 2024 00:24:52 +0200
+
 photo-importer (1.2.4) stable; urgency=medium
 
   * Add time_shift options
