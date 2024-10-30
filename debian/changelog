@@ -1,3 +1,10 @@
+photo-importer (1.2.6) stable; urgency=medium
+
+  * Add Clear button for server import
+  * Disable log for unmounted devices
+
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Thu, 31 Oct 2024 00:37:55 +0100
+
 photo-importer (1.2.5) stable; urgency=medium
 
   * Package refactoring
