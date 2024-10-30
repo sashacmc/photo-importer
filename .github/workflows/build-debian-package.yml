@@ -50,7 +50,7 @@ jobs:
           photo-importer -h
 
       - name: Upload Debian package as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: debian-package
           path: artifacts/*.deb

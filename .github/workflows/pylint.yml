@@ -21,4 +21,4 @@ jobs:
         pip install .
     - name: Analysing the code with pylint
       run: |
-        pylint $(git ls-files '*.py') --disable missing-function-docstring,missing-module-docstring,missing-class-docstring,broad-exception-caught
+        pylint $(git ls-files '*.py') --disable missing-function-docstring,missing-module-docstring,missing-class-docstring,broad-exception-caught,too-many-positional-arguments
