@@ -257,6 +257,9 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
     def __import_get_log(self, in_path):
         return self.server.get_log(in_path)
 
+    def __import_done(self, in_path):
+        return self.server.import_done(in_path)
+
     def __import_request(self, params):
         try:
             action = params['a'][0]
@@ -281,6 +284,9 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
         elif action == 'getlog':
             result = self.__import_get_log(in_path)
             self.__text_response(result)
+        elif action == 'done':
+            result = self.__import_done(in_path)
+            self.__ok_response(result)
         else:
             raise HTTPError(HTTPStatus.BAD_REQUEST, f'unknown action {action}')
 
@@ -422,6 +428,7 @@ class PhotoImporterServer(http.server.HTTPServer):
         logging.info('import_done: %s', in_path)
         if in_path in self.__importers:
             del self.__importers[in_path]
+        return ''
 
     def get_log(self, in_path):
         if in_path in self.__importers:

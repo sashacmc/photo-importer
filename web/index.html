@@ -54,6 +54,8 @@
                     name = ""
                     if (state == "mounted" || state == "done") {
                         action += "<input onclick=\"sendCommand('start', '" + path + "');\" type=button class=\"btn btn-success btn-sm\" value=\"Import\"/> ";
+                    } else if (state == "done" || state == "error") {
+                        action = "<input onclick=\"sendCommand('done', '" + path + "');\" type=button class=\"btn btn-primary btn-sm\" value=\"Clear\"/> ";
                     }
                 } else {
                     if (state == "mounted") {
@@ -80,6 +82,10 @@
                 if (data[dev].read_only) {
                     name += "<br/><font size=\"-2\">(read only)<font>"
                 }
+                var log = ""
+                if (path != "") {
+                    log = "<a href=\"import?a=getlog&p=" + path + "\"><img src=\"log.png\"/></a>"	
+                }
                 html += "<tr>"
                      + "<td>" + name + "</td>"
                      + "<td>" + data[dev].path + "</td>"
@@ -87,7 +93,7 @@
                      + "<td>" + action + "</td>"
                      + "<td>" + data[dev].size + "&nbsp;GB</td>"
                      + "<td>" + progress(data[dev].usage, "", "bg-info") + "</td>"
-                     + "<td><a href=\"import?a=getlog&p=" + path + "\"><img src=\"log.png\"/></a></td>"
+                     + "<td>" + log + "</td>"
                      + "</tr>"
             }
             html += "</table>"
@@ -147,7 +153,7 @@
                     }
                 });
             } else
-            if (cmd == "start") { 
+            if (cmd == "start" || cmd == "done") { 
                 var argpath = "";
                 if (g_outpath) {
                     argpath = "&o=" + g_outpath;
