@@ -75,8 +75,19 @@ class FileProp:
         self.__out_list = set()
         self.__exiftool = exiftool.ExifToolHelper()
 
+    def close(self):
+        if self.__exiftool is not None:
+            self.__exiftool.terminate()
+            self.__exiftool = None
+
     def __del__(self):
-        self.__exiftool.terminate()
+        self.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
     def __prepare_ext_to_type(self):
         self.ext_to_type = {}
