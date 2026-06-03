@@ -90,8 +90,8 @@ class Importer(threading.Thread):
 
     def __remove_empty_dirs(self, dirs):
         logging.info('Removing empty dirs')
-        len_dirs = reversed(sorted([(len(d), d) for d in dirs]))
-        for _, d in len_dirs:
+        # Deepest first, so parents become empty once children are removed.
+        for d in sorted(dirs, key=lambda p: p.count(os.sep), reverse=True):
             try:
                 os.rmdir(d)
                 logging.info('Removed: %s', d)
