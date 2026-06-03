@@ -5,125 +5,183 @@
 [![PyPI - Downloads](https://pepy.tech/badge/photo-importer)](https://pepy.tech/project/photo-importer)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-Command line tools for photo importing/renaming/rotating
-### Features:
-  * Media files scan
-  * Time when picture was taken detection (by EXIF, by file name, by file attributes)
-  * Media files moving/copying to configurable hierarchy 
-  * Lossless rotations (via exiftran or jpegtran)
+A command-line tool and standalone web server for importing, renaming, and rotating photos and videos from cameras, USB drives, and memory cards.
 
-# Photo Importer Server
-Standalone web server for fast media import for headless computer
-### Features:
-  * Mounted storages detection (by path mask)
-  * Storages mount/unmount (via pmount)
-  * The same as photo-importer but without console
+---
 
-# Installation
+## Table of Contents
 
-### Requirements:
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Acknowledgements](#acknowledgements)
 
-  * Python 3.3+
+---
 
-### Supported OS:
+## Features
 
-  * Debian based Linux (other Linux versions not officially supported, but might work)
-  * Windows 7 and above
-  * MacOS X and above (with brew installed, only console version)
+### photo-importer (CLI)
 
-### Dependencies:
-  * [PyExifTool](https://pypi.org/project/PyExifTool/)
-  * [progressbar](https://pypi.org/project/progressbar/)
-  * [psutil](https://pypi.org/project/psutil/)
-  * [exiftran](https://linux.die.net/man/1/exiftran) or [jpegtran](https://linux.die.net/man/1/jpegtran)
-  * [pmount](https://linux.die.net/man/1/pmount) (only for server)
-  * [pypiwin32](https://pypi.org/project/pypiwin32/) (only for windows)
+- Scans directories for media files (images, video, audio)
+- Detects capture time via EXIF metadata, filename patterns, or file attributes
+- Organises files into a configurable date-based directory hierarchy
+- Renames files according to capture timestamp
+- Performs lossless JPEG rotation (via [exiftran](https://linux.die.net/man/1/exiftran) or [jpegtran](https://linux.die.net/man/1/jpegtran))
+- Supports dry-run mode for previewing changes without modifying files
 
+### photo-importer-server (Web UI)
 
-### Installation Options:
+- Standalone web server for use on headless machines (e.g. a home server or Raspberry Pi)
+- Detects mounted removable storage by path mask
+- Provides one-click mount, import, and unmount via a browser interface
+- Same import pipeline as the CLI tool
 
-#### Installing via PyPi
+---
+
+## Installation
+
+### Requirements
+
+- Python 3.6+
+
+### Supported Platforms
+
+| Platform | Support |
+|---|---|
+| Debian-based Linux | Full (CLI + Web) |
+| Other Linux | Unofficial (likely works) |
+| Windows 7+ | CLI + Web |
+| macOS (with Homebrew) | CLI only |
+
+### System Dependencies
+
+| Dependency | Purpose |
+|---|---|
+| [exiftool](https://exiftool.org/) | EXIF metadata reading |
+| [exiftran](https://linux.die.net/man/1/exiftran) or [jpegtran](https://linux.die.net/man/1/jpegtran) | Lossless JPEG rotation |
+| [pmount](https://linux.die.net/man/1/pmount) | Storage mount/unmount (server only) |
+
+### Python Dependencies
+
+- [PyExifTool](https://pypi.org/project/PyExifTool/)
+- [progressbar](https://pypi.org/project/progressbar/)
+- [psutil](https://pypi.org/project/psutil/)
+- [pypiwin32](https://pypi.org/project/pypiwin32/) *(Windows only)*
+
+### Installing via PyPI *(recommended)*
+
 ```bash
 sudo apt install exiftran exiftool pmount pip
 sudo pip install photo-importer
 ```
-#### Installing as debian package
+
+### Installing as a Debian Package
+
 ```bash
 debuild -b
 sudo apt install pip python3-exif python3-progressbar exiftran python3-psutil
 sudo pip install PyExifTool
-sudo dpkg -i ../photo-importer_1.2.5_all.deb
+sudo dpkg -i ../photo-importer_*.deb
 ```
-#### Installing via setup.py
+
+### Installing from Source
+
 ```bash
 sudo apt install exiftran exiftool pmount pip
 sudo pip install PyExifTool progressbar psutil
 sudo python3 ./setup.py install
 ```
 
-#### Installing for Windows
-Download and install python3 for you Windows distributive
-https://www.python.org/downloads/windows/
+### Installing on Windows
 
-Download and install exiftool
-https://exiftool.org/
+1. Download and install [Python 3](https://www.python.org/downloads/windows/)
+2. Download and install [ExifTool](https://exiftool.org/)
+3. Download and extract [jpegtran](http://sylvana.net/jpegcrop/jpegtran/) into the `photo_importer` folder
+4. Install the package and its Windows dependencies:
 
-Download and extract jpegtran to photo_importer folder
-http://sylvana.net/jpegcrop/jpegtran/
-
-Install with python dependencies
-```bash
+```bat
 python -m pip install pypiwin32 photo-importer
 ```
 
+---
+
 ## Usage
+
 ### Command-Line Interface
+
+**In-place processing** — rename and rotate files without moving them:
 
 ```bash
 photo-importer /path/to/media/files
 ```
-Will process files (reanaming/rotating) in-place.
+
 ![In place example](https://user-images.githubusercontent.com/28735879/76139947-bd249780-6055-11ea-85c0-0985b6bde93f.png)
+
+**Import to output directory** — move (or copy) files into a date-based hierarchy:
 
 ```bash
 photo-importer /path/to/media/files /output/path
 ```
-Will import (by default move, but it can be changed in config) files from /path/to/media/files to /output/path with date hierarchy creation and reanaming/rotating
+
+Files are moved by default. To copy instead, set `move_mode = 0` in the config file.
 
 ![Move example](https://user-images.githubusercontent.com/28735879/76139964-eba27280-6055-11ea-988f-aa71cda7ba36.png)
 
+**CLI options:**
+
+| Option | Description |
+|---|---|
+| `in_path` | Source directory to scan (required) |
+| `out_path` | Destination directory (optional; in-place mode if omitted) |
+| `-c`, `--config FILE` | Path to a custom config file |
+| `-l`, `--logfile FILE` | Log file path (default: `log.txt`) |
+| `-d`, `--dryrun` | Dry run — preview actions without modifying files |
+
 ### Web Interface
-  * attach usb-drive / usert memory card
-  * open http://servername:8080
-  * click "Mount"
-  * click "Import"
-  * click "Unmount"
+
+1. Attach a USB drive or insert a memory card
+2. Open `http://<hostname>:8080` in a browser
+3. Click **Mount**
+4. Click **Import**
+5. Click **Unmount**
 
 ![Web interface example](https://user-images.githubusercontent.com/28735879/76140174-f1995300-6057-11ea-8718-19c38650c786.png)
 
-### Windows command line
-```bash
+### Windows — Command Line
+
+```bat
 cd photo_importer
-run.py -c ..\photo-importer-win.cfg path\to\media\files \output\path
+python run.py -c ..\photo-importer-win.cfg path\to\media\files \output\path
 ```
-### Windows web 
-```bash
+
+### Windows — Web Server
+
+```bat
 photo-importer-server.bat
 ```
 
+---
+
 ## Configuration
-The server config file located in /etc/photo-importer.cfg
 
-Command line tool config file located in ~/.photo-importer.cfg
+| Scope | Default config file |
+|---|---|
+| CLI tool | `~/.photo-importer.cfg` |
+| Web server | `/etc/photo-importer.cfg` |
 
-Also config file can be specified by mean of -c command line option.
+A custom config file can be passed to the CLI with the `-c` option.
 
-For options details see comments in the config file.
+All available options are documented with comments inside the config file itself.
+
+---
 
 ## Acknowledgements
-Thanks to everyone who tested and gave advice.
 
-**Bug reports, suggestions and pull request are welcome!**
+Thanks to everyone who tested the tool and provided feedback.
 
-## Show your support
+Bug reports, suggestions, and pull requests are welcome!
+
+## Show Your Support
+
 Give a ⭐️ if this project helped you!
