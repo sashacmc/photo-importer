@@ -39,6 +39,7 @@ class Importer(threading.Thread):
 
         self.__stat['stage'] = 'done'
         logging.info('Done: %s', str(self.status()))
+        self.__log.close()
 
     def __scan_files(self, input_path):
         self.__stat['stage'] = 'scan'

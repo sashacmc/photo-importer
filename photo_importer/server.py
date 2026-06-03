@@ -10,6 +10,7 @@ import logging
 import argparse
 import threading
 import subprocess
+import socketserver
 import http.server
 from http import HTTPStatus
 
@@ -393,7 +394,8 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             logging.exception(ex)
 
 
-class PhotoImporterServer(http.server.HTTPServer):
+class PhotoImporterServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+    daemon_threads = True
     def __init__(self, cfg):
         self.__cfg = cfg
         self.__importers = {}
@@ -419,6 +421,7 @@ class PhotoImporterServer(http.server.HTTPServer):
         return self.__move_mode
 
     def import_start(self, in_path, out_path):
+        in_path = os.path.realpath(in_path)
         logging.info('import_start: %s', in_path)
 
         imp = importer.Importer(self.__cfg, in_path, out_path, False)
@@ -427,6 +430,7 @@ class PhotoImporterServer(http.server.HTTPServer):
         imp.start()
 
     def import_status(self, in_path):
+        in_path = os.path.realpath(in_path)
         with self.__importers_lock:
             imp = self.__importers.get(in_path)
         if imp is not None:
@@ -434,12 +438,14 @@ class PhotoImporterServer(http.server.HTTPServer):
         return None
 
     def import_done(self, in_path):
+        in_path = os.path.realpath(in_path)
         logging.info('import_done: %s', in_path)
         with self.__importers_lock:
             self.__importers.pop(in_path, None)
         return ''
 
     def get_log(self, in_path):
+        in_path = os.path.realpath(in_path)
         with self.__importers_lock:
             imp = self.__importers.get(in_path)
         if imp is not None:

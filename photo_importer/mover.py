@@ -80,7 +80,7 @@ class Mover:
 
             if not os.path.isdir(path):
                 if not self.__dryrun:
-                    os.makedirs(path)
+                    os.makedirs(path, exist_ok=True)
                 logging.info('dir "%s" created', path)
 
             fullname = prop.out_name_full(path)

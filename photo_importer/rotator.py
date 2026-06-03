@@ -122,7 +122,8 @@ class Rotator:
                     if line:
                         logging.error('jpegtran (%s) failed: %s', filename, line)
                         return False
-                    if p.returncode is not None and p.returncode != 0:
+                    p.wait()
+                    if p.returncode != 0:
                         logging.error('jpegtran (%s) exited with code %d', filename, p.returncode)
                         return False
 
