@@ -13,6 +13,9 @@ jobs:
         include:
           - python-version: "3.7"
             os: ubuntu-20.04
+        exclude:
+          - python-version: "3.7"
+            os: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
