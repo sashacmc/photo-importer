@@ -25,7 +25,7 @@ class ProgressBar(threading.Thread):
             self.__pbar = None
 
         self.__pbar = progressbar.ProgressBar(
-            maxval=count,
+            max_value=count,
             widgets=[
                 name,
                 ' ',
