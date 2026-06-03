@@ -1,0 +1,21 @@
+{
+  "env": {
+    "browser": true,
+    "es2020": true,
+    "jquery": true
+  },
+  "plugins": ["html"],
+  "rules": {
+    "no-eval": "error",
+    "no-undef": "error",
+    "no-unused-vars": [
+      "warn",
+      {
+        "varsIgnorePattern": "^(g_|sendCommand|reload|init)",
+        "argsIgnorePattern": ".*"
+      }
+    ],
+    "eqeqeq": ["warn", "smart"],
+    "no-var": "warn"
+  }
+}
