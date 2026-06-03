@@ -8,6 +8,7 @@ import json
 import urllib
 import logging
 import argparse
+import threading
 import subprocess
 import http.server
 from http import HTTPStatus
@@ -91,7 +92,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
 
         return res
 
-    def __get_removable_devices_win(self):
+    def __get_removable_devices_win(self):  # pragma: no cover
         import win32api
         import win32con
         import win32file
@@ -192,7 +193,6 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
 
             with subprocess.Popen(
                 cmd,
-                shell=True,
                 universal_newlines=True,
                 stderr=subprocess.PIPE,
             ) as p:
@@ -215,11 +215,11 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
 
     def __mount_mount(self, dev):
         dev_path = self.__check_dev_for_mount(dev)
-        return self.__run_cmd(f'pmount --umask=000 {dev_path}')
+        return self.__run_cmd(['pmount', '--umask=000', dev_path])
 
     def __mount_umount(self, dev):
         dev_path = self.__check_dev_for_mount(dev)
-        return self.__run_cmd(f'pumount {dev_path}')
+        return self.__run_cmd(['pumount', dev_path])
 
     def __mount_request(self, params):
         try:
@@ -309,8 +309,9 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
         try:
             if (path[0]) == '/':
                 path = path[1:]
-            fname = os.path.normpath(os.path.join(self.server.web_path(), path))
-            if not fname.startswith(self.server.web_path()):
+            web_path = self.server.web_path()
+            fname = os.path.normpath(os.path.join(web_path, path))
+            if fname != web_path and not fname.startswith(web_path + os.sep):
                 logging.warning('incorrect path: %s', path)
                 raise HTTPError(HTTPStatus.NOT_FOUND, path)
             ext = os.path.splitext(fname)[1]
@@ -318,11 +319,11 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             if ext == '.html':
                 cont = 'text/html'
             elif ext == '.js':
-                cont = 'text/script'
+                cont = 'application/javascript'
             elif ext == '.png':
                 cont = 'image/png'
             else:
-                cont = 'text/none'
+                cont = 'application/octet-stream'
             with open(fname, 'rb') as f:  # lgtm[py/path-injection]
                 self.send_response(200)
                 self.send_header('Content-type', cont)
@@ -382,6 +383,9 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             if path == '/import':
                 self.__import_request(params)
                 return
+
+            logging.warning('Wrong path: %s', path)
+            raise HTTPError(HTTPStatus.NOT_FOUND, path)
         except HTTPError as ex:
             self.__error_response_post(ex.code, ex.reason)
         except Exception as ex:
@@ -393,12 +397,14 @@ class PhotoImporterServer(http.server.HTTPServer):
     def __init__(self, cfg):
         self.__cfg = cfg
         self.__importers = {}
+        self.__importers_lock = threading.Lock()
+        host = cfg['server']['host']
         port = int(cfg['server']['port'])
         self.__web_path = os.path.normpath(cfg['server']['web_path'])
         self.__out_path = cfg['server']['out_path']
         self.__fixed_in_path = cfg['server']['in_path']
         self.__move_mode = int(cfg['main']['move_mode'])
-        super().__init__(('', port), PhotoImporterHandler)
+        super().__init__((host, port), PhotoImporterHandler)
 
     def web_path(self):
         return self.__web_path
@@ -415,24 +421,29 @@ class PhotoImporterServer(http.server.HTTPServer):
     def import_start(self, in_path, out_path):
         logging.info('import_start: %s', in_path)
 
-        self.__importers[in_path] = importer.Importer(self.__cfg, in_path, out_path, False)
-
-        self.__importers[in_path].start()
+        imp = importer.Importer(self.__cfg, in_path, out_path, False)
+        with self.__importers_lock:
+            self.__importers[in_path] = imp
+        imp.start()
 
     def import_status(self, in_path):
-        if in_path in self.__importers:
-            return self.__importers[in_path].status()
+        with self.__importers_lock:
+            imp = self.__importers.get(in_path)
+        if imp is not None:
+            return imp.status()
         return None
 
     def import_done(self, in_path):
         logging.info('import_done: %s', in_path)
-        if in_path in self.__importers:
-            del self.__importers[in_path]
+        with self.__importers_lock:
+            self.__importers.pop(in_path, None)
         return ''
 
     def get_log(self, in_path):
-        if in_path in self.__importers:
-            return self.__importers[in_path].log_text()
+        with self.__importers_lock:
+            imp = self.__importers.get(in_path)
+        if imp is not None:
+            return imp.log_text()
         return ''
 
 
