@@ -1,0 +1,12 @@
+[run]
+source = photo_importer
+omit =
+    */conftest.py
+    */*_test.py
+    photo_importer/test.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.:
+    raise NotImplementedError

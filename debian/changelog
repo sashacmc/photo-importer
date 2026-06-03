@@ -1,3 +1,27 @@
+photo-importer (1.3.0) stable; urgency=medium
+
+  * Fix jpegtran rotator returncode check (was always None before p.wait())
+  * Fix empty directory cleanup ordering
+  * Fix dryrun mode for file skipping
+  * Fix server security: validate and sanitize input paths
+  * Add ThreadingMixIn to HTTP server for concurrent request handling
+  * Add explicit MemLogger.close() to prevent log handler leakage
+  * Add exist_ok=True to os.makedirs() to prevent race on concurrent imports
+  * Guard missing move/rotate status keys in CLI error reporting
+  * Guard empty directory part in log file path creation
+  * Add os.path.realpath() normalization for importer path keys in server
+  * Update deprecated progressbar maxval field
+  * Add Config use_system_config parameter for test isolation
+  * Improve web UI: fix XSS via eval(), add escapeHtml(), fix dead state branch,
+    replace <font> tags, add AJAX error handlers, add visibility-aware polling,
+    add encodeURIComponent for all query params
+  * Add ESLint CI workflow for JavaScript linting
+  * Improve test coverage: add tests for config, mover, rotator, server, run
+  * Update CI workflows: update actions/checkout, fix Python version matrix
+  * Update README
+
+ -- Alexander Bushnev <Alexander@Bushnev.pro>  Wed, 03 Jun 2026 20:04:14 +0200
+
 photo-importer (1.2.6) stable; urgency=medium
 
   * Add Clear button for server import

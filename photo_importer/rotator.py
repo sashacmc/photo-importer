@@ -59,7 +59,7 @@ class Rotator:
     def __process_exiftran(self, filename):
         ok = False
         try:
-            cmd = f'exiftran -aip "{filename}"'
+            cmd = ['exiftran', '-aip', filename]
             logging.debug('rotate: %s', cmd)
 
             if self.__dryrun:
@@ -68,7 +68,6 @@ class Rotator:
             error = ''
             with subprocess.Popen(
                 cmd,
-                shell=True,
                 universal_newlines=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
@@ -98,40 +97,48 @@ class Rotator:
             if orientation_cmd is None:
                 return True
 
-            logging.debug('rotate: jpegtran %s %s', orientation_cmd, filename)
-
             if self.__dryrun:
+                logging.debug('rotate: jpegtran %s %s', orientation_cmd, filename)
                 return True
 
             handle, tmpfile = tempfile.mkstemp(dir=os.path.dirname(filename))
             os.close(handle)
 
-            cmd = 'jpegtran -copy all -outfile {tmpfile} {orientation_cmd} {filename}'
+            try:
+                cmd = ['jpegtran', '-copy', 'all', '-outfile', tmpfile] + orientation_cmd.split() + [filename]
+                logging.debug('rotate: %s', cmd)
 
-            with subprocess.Popen(
-                cmd,
-                shell=True,
-                universal_newlines=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-            ) as p:
-                line = p.stderr.readline()
-                if line:
-                    logging.error('jpegtran (%s) failed: %s', filename, line)
-                    return False
+                with subprocess.Popen(
+                    cmd,
+                    universal_newlines=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                ) as p:
+                    line = p.stderr.readline()
+                    if line:
+                        logging.error('jpegtran (%s) failed: %s', filename, line)
+                        return False
+                    p.wait()
+                    if p.returncode != 0:
+                        logging.error('jpegtran (%s) exited with code %d', filename, p.returncode)
+                        return False
 
-            self.__clear_orientation_tag(tmpfile)
+                self.__clear_orientation_tag(tmpfile)
 
-            os.remove(filename)
-            os.rename(tmpfile, filename)
+                os.remove(filename)
+                os.rename(tmpfile, filename)
+                tmpfile = None
 
-            return True
+                return True
+            finally:
+                if tmpfile is not None and os.path.exists(tmpfile):
+                    os.remove(tmpfile)
         except Exception as ex:
             logging.error('Rotator exception (%s): %s', filename, ex)
             return False
 
     def __get_orientation_cmd(self, fullname):
-        tags = self.__exiftool.get_tags(fullname, ORIENTATION_TAG)
+        tags = self.__exiftool.get_tags(fullname, ORIENTATION_TAG)[0]
         if ORIENTATION_TAG not in tags:
             return None
         orientation = tags[ORIENTATION_TAG]

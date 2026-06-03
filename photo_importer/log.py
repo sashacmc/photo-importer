@@ -10,7 +10,9 @@ DATEFMT = '%Y-%m-%d %H:%M:%S'
 def init_logger(filename=None, level=logging.INFO):
     if filename is not None:
         try:
-            os.makedirs(os.path.split(filename)[0])
+            dir_part = os.path.split(filename)[0]
+            if dir_part:
+                os.makedirs(dir_part, exist_ok=True)
         except OSError:
             pass
         mode = 'a' if os.path.isfile(filename) else 'w'
@@ -38,9 +40,14 @@ class MemLogger:
         logging.getLogger().addHandler(self.__handler)
         logging.info("MemLogger %s started", self.__name)
 
+    def close(self):
+        if self.__handler is not None:
+            logging.info("MemLogger %s finished", self.__name)
+            logging.getLogger().removeHandler(self.__handler)
+            self.__handler = None
+
     def __del__(self):
-        logging.getLogger().removeHandler(self.__handler)
-        logging.info("MemLogger %s finished", self.__name)
+        self.close()
 
     def get_text(self):
         return self.__stream.getvalue()

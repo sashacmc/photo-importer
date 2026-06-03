@@ -24,9 +24,7 @@ class Importer(threading.Thread):
         self.__log = log.MemLogger(input_path)
 
     def run(self):
-        logging.info(
-            'Start: %s -> %s (dryrun: %s)', self.__input_path, self.__output_path, self.__dryrun
-        )
+        logging.info('Start: %s -> %s (dryrun: %s)', self.__input_path, self.__output_path, self.__dryrun)
 
         filenames, dirs = self.__scan_files(self.__input_path)
 
@@ -39,6 +37,7 @@ class Importer(threading.Thread):
 
         self.__stat['stage'] = 'done'
         logging.info('Done: %s', str(self.status()))
+        self.__log.close()
 
     def __scan_files(self, input_path):
         self.__stat['stage'] = 'scan'
@@ -90,8 +89,8 @@ class Importer(threading.Thread):
 
     def __remove_empty_dirs(self, dirs):
         logging.info('Removing empty dirs')
-        len_dirs = reversed(sorted([(len(d), d) for d in dirs]))
-        for _, d in len_dirs:
+        # Deepest first, so parents become empty once children are removed.
+        for d in sorted(dirs, key=lambda p: p.count(os.sep), reverse=True):
             try:
                 os.rmdir(d)
                 logging.info('Removed: %s', d)

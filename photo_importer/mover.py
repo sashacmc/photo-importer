@@ -37,17 +37,20 @@ class Mover:
         self.__stat['processed'] = 0
         self.__stat['errors'] = 0
         res = []
-        for fname in self.__filenames:
-            try:
-                prop = self.__file_prop.get(fname)
-                new_fname = self.__move_file(fname, prop)
-                if new_fname:
-                    res.append((fname, new_fname, prop))
-            except Exception as ex:
-                logging.error('Move files exception: %s', ex)
-                self.__stat['errors'] += 1
+        try:
+            for fname in self.__filenames:
+                try:
+                    prop = self.__file_prop.get(fname)
+                    new_fname = self.__move_file(fname, prop)
+                    if new_fname:
+                        res.append((fname, new_fname, prop))
+                except Exception as ex:
+                    logging.error('Move files exception: %s', ex)
+                    self.__stat['errors'] += 1
 
-            self.__stat['processed'] += 1
+                self.__stat['processed'] += 1
+        finally:
+            self.__file_prop.close()
 
         return res
 
@@ -77,7 +80,7 @@ class Mover:
 
             if not os.path.isdir(path):
                 if not self.__dryrun:
-                    os.makedirs(path)
+                    os.makedirs(path, exist_ok=True)
                 logging.info('dir "%s" created', path)
 
             fullname = prop.out_name_full(path)
@@ -104,6 +107,8 @@ class Mover:
         return new_fname
 
     def __move(self, src, dst):
+        if self.__dryrun:
+            return
         if self.__use_shutil:
             shutil.move(src, dst)
         else:
@@ -111,6 +116,8 @@ class Mover:
                 raise SystemError(f'mv "{src}" "{dst}" failed')
 
     def __copy(self, src, dst):
+        if self.__dryrun:
+            return
         if self.__use_shutil:
             shutil.copy2(src, dst)
         else:
@@ -118,9 +125,6 @@ class Mover:
                 raise SystemError(f'cp "{src}" "{dst}" failed')
 
     def __run(self, args):
-        if self.__dryrun:
-            return True
-
         with subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
             proc.wait()
             info = proc.stdout.read().strip()

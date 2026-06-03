@@ -75,8 +75,19 @@ class FileProp:
         self.__out_list = set()
         self.__exiftool = exiftool.ExifToolHelper()
 
+    def close(self):
+        if self.__exiftool is not None:
+            self.__exiftool.terminate()
+            self.__exiftool = None
+
     def __del__(self):
-        self.__exiftool.terminate()
+        self.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
 
     def __prepare_ext_to_type(self):
         self.ext_to_type = {}
@@ -148,9 +159,7 @@ class FileProp:
 
     def __time_by_attr(self, fullname):
         try:
-            return datetime.datetime.fromtimestamp(
-                time.mktime(time.localtime(os.stat(fullname)[stat.ST_MTIME]))
-            )
+            return datetime.datetime.fromtimestamp(time.mktime(time.localtime(os.stat(fullname)[stat.ST_MTIME])))
         except (FileNotFoundError, KeyError) as ex:
             logging.warning('time by attr (%s) exception: %s', fullname, ex)
         return None
@@ -189,9 +198,7 @@ class FileProp:
             ftime += datetime.timedelta(seconds=int(time_shift))
 
         if ftime:
-            out_name = ftime.strftime(
-                self.__config['main']['out_time_format']
-            ) + self.__calc_orig_name(fname)
+            out_name = ftime.strftime(self.__config['main']['out_time_format']) + self.__calc_orig_name(fname)
         else:
             out_name = None
 

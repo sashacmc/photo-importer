@@ -35,6 +35,7 @@ class Config:
             'time_shift': 0,
         },
         'server': {
+            'host': '',
             'port': 8080,
             'web_path': 'web',
             'out_path': '/mnt/multimedia/NEW/',
@@ -43,8 +44,8 @@ class Config:
         },
     }
 
-    def __init__(self, filename=None, create=False):
-        if filename is None:
+    def __init__(self, filename=None, create=False, use_system_config=True):
+        if filename is None and use_system_config:
             for f in self.DEFAULT_CONFIG_FILES:
                 if os.path.exists(f):
                     filename = f
