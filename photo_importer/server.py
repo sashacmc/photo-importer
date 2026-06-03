@@ -56,10 +56,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(bytearray(explain, 'utf-8'))
 
     def __get_mounted_list(self):
-        return {
-            os.path.basename(dp.device): (dp.device, dp.mountpoint)
-            for dp in psutil.disk_partitions()
-        }
+        return {os.path.basename(dp.device): (dp.device, dp.mountpoint) for dp in psutil.disk_partitions()}
 
     def __bytes_to_gbytes(self, b):
         return round(b / 1024.0 / 1024.0 / 1024.0, 2)
@@ -396,6 +393,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
 
 class PhotoImporterServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
     daemon_threads = True
+
     def __init__(self, cfg):
         self.__cfg = cfg
         self.__importers = {}

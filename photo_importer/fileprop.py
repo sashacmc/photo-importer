@@ -159,9 +159,7 @@ class FileProp:
 
     def __time_by_attr(self, fullname):
         try:
-            return datetime.datetime.fromtimestamp(
-                time.mktime(time.localtime(os.stat(fullname)[stat.ST_MTIME]))
-            )
+            return datetime.datetime.fromtimestamp(time.mktime(time.localtime(os.stat(fullname)[stat.ST_MTIME])))
         except (FileNotFoundError, KeyError) as ex:
             logging.warning('time by attr (%s) exception: %s', fullname, ex)
         return None
@@ -200,9 +198,7 @@ class FileProp:
             ftime += datetime.timedelta(seconds=int(time_shift))
 
         if ftime:
-            out_name = ftime.strftime(
-                self.__config['main']['out_time_format']
-            ) + self.__calc_orig_name(fname)
+            out_name = ftime.strftime(self.__config['main']['out_time_format']) + self.__calc_orig_name(fname)
         else:
             out_name = None
 

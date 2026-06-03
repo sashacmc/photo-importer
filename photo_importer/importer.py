@@ -24,9 +24,7 @@ class Importer(threading.Thread):
         self.__log = log.MemLogger(input_path)
 
     def run(self):
-        logging.info(
-            'Start: %s -> %s (dryrun: %s)', self.__input_path, self.__output_path, self.__dryrun
-        )
+        logging.info('Start: %s -> %s (dryrun: %s)', self.__input_path, self.__output_path, self.__dryrun)
 
         filenames, dirs = self.__scan_files(self.__input_path)
 

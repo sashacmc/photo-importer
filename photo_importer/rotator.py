@@ -105,11 +105,7 @@ class Rotator:
             os.close(handle)
 
             try:
-                cmd = (
-                    ['jpegtran', '-copy', 'all', '-outfile', tmpfile]
-                    + orientation_cmd.split()
-                    + [filename]
-                )
+                cmd = ['jpegtran', '-copy', 'all', '-outfile', tmpfile] + orientation_cmd.split() + [filename]
                 logging.debug('rotate: %s', cmd)
 
                 with subprocess.Popen(

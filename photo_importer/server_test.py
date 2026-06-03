@@ -195,9 +195,7 @@ def test_mount_cmd_error_500(http_server, monkeypatch):
 def test_import_start_over_http(http_server, tmp_path):
     indir = tmp_path / 'imp_in'
     indir.mkdir()
-    status, _, body = _request(
-        http_server, 'POST', f'/import?a=start&p={indir}&o={tmp_path / "imp_out"}'
-    )
+    status, _, body = _request(http_server, 'POST', f'/import?a=start&p={indir}&o={tmp_path / "imp_out"}')
     assert status == 200
     assert json.loads(body) is True
 
