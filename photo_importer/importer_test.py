@@ -11,7 +11,7 @@ from photo_importer import importer
 class TestImporter(unittest.TestCase):
     def test_importer(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
-            cfg = config.Config()
+            cfg = config.Config(use_system_config=False)
             cfg.set('main', 'move_mode', '0')
             imp = importer.Importer(
                 cfg,

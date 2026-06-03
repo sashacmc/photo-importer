@@ -10,7 +10,7 @@ from photo_importer import fileprop
 
 class TestFileProp(unittest.TestCase):
     def setUp(self):
-        self.conf = config.Config()
+        self.conf = config.Config(use_system_config=False)
         self.fp = fileprop.FileProp(self.conf)
         self.conf.set('main', 'time_src_image', 'name')
         self.conf.set('main', 'time_src_video', 'name')
