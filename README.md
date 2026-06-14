@@ -1,6 +1,7 @@
 # Photo Importer
 
 ![CodeQL](https://github.com/sashacmc/photo-importer/workflows/CodeQL/badge.svg)
+![Codespell](https://github.com/sashacmc/photo-importer/actions/workflows/codespell.yml/badge.svg)
 [![PyPI - Version](https://img.shields.io/pypi/v/photo-importer.svg)](https://pypi.org/project/photo-importer)
 [![PyPI - Downloads](https://pepy.tech/badge/photo-importer)](https://pepy.tech/project/photo-importer)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
