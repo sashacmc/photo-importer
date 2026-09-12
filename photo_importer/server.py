@@ -106,7 +106,7 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
                 }
         return res
 
-    def __get_removable_devices(self):
+    def __get_removable_devices(self, in_path):
         res = {}
         if os.name == 'nt':
             res = self.__get_removable_devices_win()
@@ -115,11 +115,11 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
         else:
             raise UserWarning(f'Unsupported os: {os.name}')
 
-        if self.server.fixed_in_path() != '':
+        if in_path != '':
             res[FIXED_IN_PATH_NAME] = {
                 'dev_path': FIXED_IN_PATH_NAME,
-                'mount_path': self.server.fixed_in_path(),
-                'read_only': not os.access(self.server.fixed_in_path(), os.W_OK),
+                'mount_path': in_path,
+                'read_only': not os.access(in_path, os.W_OK),
             }
 
         return res
@@ -133,8 +133,8 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
                 res += self.__folder_size(entry.path)
         return res
 
-    def __mount_get_list(self):
-        dev_list = self.__get_removable_devices()
+    def __mount_get_list(self, in_path):
+        dev_list = self.__get_removable_devices(in_path)
 
         res = {}
         for dev, info in dev_list.items():
@@ -173,10 +173,10 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
             res[dev] = r
         return res
 
-    def __check_dev_for_mount(self, dev):
+    def __check_dev_for_mount(self, dev, in_path):
         if dev == '':
             raise HTTPError(HTTPStatus.BAD_REQUEST, 'empty "d" param')
-        dev_list = self.__get_removable_devices()
+        dev_list = self.__get_removable_devices(in_path)
         if dev not in dev_list:
             raise HTTPError(HTTPStatus.BAD_REQUEST, f'wrong device: {dev}')
         device = dev_list[dev]
@@ -211,12 +211,12 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
 
         return True
 
-    def __mount_mount(self, dev):
-        dev_path = self.__check_dev_for_mount(dev)
+    def __mount_mount(self, dev, in_path):
+        dev_path = self.__check_dev_for_mount(dev, in_path)
         return self.__run_cmd(['pmount', '--umask=000', dev_path])
 
-    def __mount_umount(self, dev):
-        dev_path = self.__check_dev_for_mount(dev)
+    def __mount_umount(self, dev, in_path):
+        dev_path = self.__check_dev_for_mount(dev, in_path)
         return self.__run_cmd(['pumount', dev_path])
 
     def __mount_request(self, params):
@@ -231,14 +231,19 @@ class PhotoImporterHandler(http.server.BaseHTTPRequestHandler):
         except Exception:
             dev = ''
 
+        try:
+            in_path = params['i'][0]
+        except Exception:
+            in_path = self.server.fixed_in_path()
+
         result = None
 
         if action == 'list':
-            result = self.__mount_get_list()
+            result = self.__mount_get_list(in_path)
         elif action == 'mount':
-            result = self.__mount_mount(dev)
+            result = self.__mount_mount(dev, in_path)
         elif action == 'umount':
-            result = self.__mount_umount(dev)
+            result = self.__mount_umount(dev, in_path)
         else:
             raise HTTPError(HTTPStatus.BAD_REQUEST, f'unknown action {action}')
 

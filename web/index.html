@@ -23,6 +23,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
     <script type="text/javascript">
         var g_outpath;
+        var g_inpath;
         var updateTimer;
         var sysInfoTimer;
 
@@ -127,8 +128,9 @@
 
         function update()
         {
+            const argpath = g_inpath ? "&i=" + encodeURIComponent(g_inpath) : "";
             $.ajax({
-                url: "mount?a=list",
+                url: "mount?a=list" + argpath,
                 cache: false,
                 dataType: "json",
                 success: function(data) {
@@ -159,8 +161,9 @@
         function sendCommand(cmd, dev)
         {
             if (cmd == "mount" || cmd == "umount") {
+                const argpath = g_inpath ? "&i=" + encodeURIComponent(g_inpath) : "";
                 $.ajax({
-                    url: "mount?a=" + cmd + "&d=" + dev,
+                    url: "mount?a=" + cmd + "&d=" + dev + argpath,
                     type: "POST",
                     success: function() {
                         update()
@@ -201,6 +204,7 @@
         {
             const urlParams = new URLSearchParams(window.location.search);
             g_outpath = urlParams.get('outpath');
+            g_inpath = urlParams.get('inpath');
 
             if (g_outpath) {
                 $("#storagePath").text("Storage: " + g_outpath);
