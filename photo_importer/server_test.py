@@ -122,7 +122,7 @@ def test_sysinfo(http_server, tmp_path):
 
 
 def test_mount_list_empty(http_server, monkeypatch):
-    monkeypatch.setattr(server.PhotoImporterHandler, _DEVICES_ATTR, lambda self: {})
+    monkeypatch.setattr(server.PhotoImporterHandler, _DEVICES_ATTR, lambda self, in_path: {})
     status, _, body = _request(http_server, 'GET', '/mount?a=list')
     assert status == 200
     assert json.loads(body) == {}
@@ -138,7 +138,7 @@ def test_mount_mount_uses_argv_list(http_server, monkeypatch):
     monkeypatch.setattr(
         server.PhotoImporterHandler,
         _DEVICES_ATTR,
-        lambda self: {'sdz1': {'dev_path': '/dev/sdz1', 'mount_path': '', 'read_only': False}},
+        lambda self, in_path: {'sdz1': {'dev_path': '/dev/sdz1', 'mount_path': '', 'read_only': False}},
     )
     monkeypatch.setattr(server.subprocess, 'Popen', _RecPopen)
 
@@ -149,7 +149,7 @@ def test_mount_mount_uses_argv_list(http_server, monkeypatch):
 
 
 def test_mount_unknown_device_400(http_server, monkeypatch):
-    monkeypatch.setattr(server.PhotoImporterHandler, _DEVICES_ATTR, lambda self: {})
+    monkeypatch.setattr(server.PhotoImporterHandler, _DEVICES_ATTR, lambda self, in_path: {})
     status, _, _ = _request(http_server, 'POST', '/mount?a=mount&d=sdz1')
     assert status == 400
 
@@ -166,7 +166,7 @@ def test_mount_list_with_devices(http_server, tmp_path, monkeypatch):
             'read_only': False,
         },
     }
-    monkeypatch.setattr(server.PhotoImporterHandler, _DEVICES_ATTR, lambda self: devices)
+    monkeypatch.setattr(server.PhotoImporterHandler, _DEVICES_ATTR, lambda self, in_path: devices)
 
     status, _, body = _request(http_server, 'GET', '/mount?a=list')
 
@@ -176,11 +176,40 @@ def test_mount_list_with_devices(http_server, tmp_path, monkeypatch):
     assert data['sdz1']['state'] == 'mounted'
 
 
+def test_mount_list_inpath_param_overrides_fixed(http_server, monkeypatch):
+    seen = []
+    monkeypatch.setattr(
+        server.PhotoImporterHandler,
+        _DEVICES_ATTR,
+        lambda self, in_path: seen.append(in_path) or {},
+    )
+
+    status, _, _ = _request(http_server, 'GET', '/mount?a=list&i=%2Foverride%2Fin')
+
+    assert status == 200
+    assert seen == ['/override/in']
+
+
+def test_mount_list_inpath_defaults_to_fixed(http_server, monkeypatch):
+    seen = []
+    monkeypatch.setattr(
+        server.PhotoImporterHandler,
+        _DEVICES_ATTR,
+        lambda self, in_path: seen.append(in_path) or {},
+    )
+
+    status, _, _ = _request(http_server, 'GET', '/mount?a=list')
+
+    assert status == 200
+    # No 'i' param -> falls back to the configured fixed in_path (default: empty).
+    assert seen == ['']
+
+
 def test_mount_cmd_error_500(http_server, monkeypatch):
     monkeypatch.setattr(
         server.PhotoImporterHandler,
         _DEVICES_ATTR,
-        lambda self: {'sdz1': {'dev_path': '/dev/sdz1', 'mount_path': '', 'read_only': False}},
+        lambda self, in_path: {'sdz1': {'dev_path': '/dev/sdz1', 'mount_path': '', 'read_only': False}},
     )
     monkeypatch.setattr(server.subprocess, 'Popen', _ErrPopen)
 
@@ -243,7 +272,7 @@ def _device(mnt):
 def test_mount_list_import_progress(http_server, tmp_path, monkeypatch):
     mnt = tmp_path / 'm'
     mnt.mkdir()
-    monkeypatch.setattr(server.PhotoImporterHandler, _DEVICES_ATTR, lambda self: _device(mnt))
+    monkeypatch.setattr(server.PhotoImporterHandler, _DEVICES_ATTR, lambda self, in_path: _device(mnt))
     monkeypatch.setattr(
         server.PhotoImporterServer,
         'import_status',
@@ -261,7 +290,7 @@ def test_mount_list_import_progress(http_server, tmp_path, monkeypatch):
 def test_mount_list_import_done_with_errors(http_server, tmp_path, monkeypatch):
     mnt = tmp_path / 'm2'
     mnt.mkdir()
-    monkeypatch.setattr(server.PhotoImporterHandler, _DEVICES_ATTR, lambda self: _device(mnt))
+    monkeypatch.setattr(server.PhotoImporterHandler, _DEVICES_ATTR, lambda self, in_path: _device(mnt))
     monkeypatch.setattr(
         server.PhotoImporterServer,
         'import_status',
@@ -282,7 +311,7 @@ def test_mount_list_import_done_with_errors(http_server, tmp_path, monkeypatch):
 def test_mount_list_import_done_ok(http_server, tmp_path, monkeypatch):
     mnt = tmp_path / 'm3'
     mnt.mkdir()
-    monkeypatch.setattr(server.PhotoImporterHandler, _DEVICES_ATTR, lambda self: _device(mnt))
+    monkeypatch.setattr(server.PhotoImporterHandler, _DEVICES_ATTR, lambda self, in_path: _device(mnt))
     monkeypatch.setattr(
         server.PhotoImporterServer,
         'import_status',
