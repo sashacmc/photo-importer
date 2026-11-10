@@ -98,3 +98,14 @@ def test_close_is_idempotent(exif_cfg):
     fp = fileprop.FileProp(exif_cfg)
     fp.close()
     fp.close()  # must not raise
+
+def test_time_by_exif_with_fractional_seconds(exif_cfg):
+    _Helper.metadata = {'EXIF:DateTimeOriginal': '2020:05:01 12:00:00.123'}
+    fp = fileprop.FileProp(exif_cfg).get('/x/photo.jpg')
+    assert fp.time() == datetime.datetime(2020, 5, 1, 12, 0, 0)
+
+
+def test_time_by_exif_with_negative_timezone(exif_cfg):
+    _Helper.metadata = {'EXIF:DateTimeOriginal': '2020:05:01 12:00:00-05:00'}
+    fp = fileprop.FileProp(exif_cfg).get('/x/photo.jpg')
+    assert fp.time() == datetime.datetime(2020, 5, 1, 12, 0, 0)
