@@ -148,6 +148,10 @@ class FileProp:
                     pos = md.find('+')
                     if pos > 0:
                         md = md[0:pos]
+                    # EXIF writers often append fractional seconds
+                    # ('...00.123') or a negative UTC offset ('...00-05:00')
+                    md = re.sub(r'[+-]\d{2}:?\d{2}$', '', md)
+                    md = md.split('.')[0]
                     return datetime.datetime.strptime(md, '%Y:%m:%d %H:%M:%S')
 
             logging.warning('time by exif (%s) not found tags count: %s', fullname, len(metadata))
